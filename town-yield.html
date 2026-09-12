@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goalbound · Town yield</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{--ground:#0a0b0c;--panel:#111214;--ink:#f4f4f2;--muted:#8b8f94;--dim:#55595e;--line:#222427;
+    --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;--body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",Menlo,monospace}
+  *{box-sizing:border-box} html{color-scheme:dark}
+  body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--body);display:grid;grid-template-columns:400px 1fr;height:100vh}
+  aside{border-right:1px solid var(--line);overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  .logo{font:700 20px/1 var(--display);letter-spacing:.04em;text-decoration:none;display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .logo i{width:9px;height:9px;border-radius:50%;background:var(--ink)}
+  h1{font:700 24px/1 var(--display);margin:0}
+  .eyebrow{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .lede{color:var(--muted);font-size:12.5px;line-height:1.45;margin:4px 0 0}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  label.f{display:block;font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  select{width:100%;padding:6px 8px;font:13px var(--body);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:5px}
+  .big{border:1px solid var(--line);border-radius:7px;padding:12px 14px}
+  .big .n{font:700 34px/1 var(--display)} .big .k{color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.35}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .card{border:1px solid var(--line);border-radius:6px;padding:8px 9px} .card .n{font:700 18px/1 var(--display)} .card .k{font:11px var(--mono);color:var(--muted);margin-top:3px}
+  h2{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:6px 0 0;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+  h2 span{letter-spacing:0;text-transform:none;font-weight:400}
+  table{width:100%;border-collapse:collapse;font-size:12.5px} td,th{padding:3px 0;vertical-align:baseline}
+  th{font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);text-align:right;padding-left:8px} th:first-child{text-align:left;padding-left:0}
+  td.r{text-align:right;font:500 12px var(--mono);color:var(--muted);white-space:nowrap;padding-left:8px} td.r b{color:var(--ink)}
+  tr.pick{cursor:pointer} tr.pick:hover td{color:var(--ink)} tr.pick.on td{color:var(--ink)} tr.pick.on td:first-child{text-decoration:underline}
+  td.st{color:var(--muted);font-size:11.5px;padding-left:6px}
+  .barw{width:70px;height:5px;background:var(--line);border-radius:2px;display:inline-block;vertical-align:middle;position:relative} .bar{position:absolute;left:0;top:0;height:5px;background:var(--ink);border-radius:2px}
+  .bar.lo{background:var(--dim)}
+  .status{font:400 11.5px var(--mono);color:var(--muted);line-height:1.45} .status b{color:var(--ink);font-weight:500}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)} .legend span{display:flex;align-items:center;gap:6px}
+  .sw{width:10px;height:10px;border-radius:50%;display:inline-block}
+  #players td{font-size:12px} #players td.r{font-size:11.5px}
+  #map{height:100vh;background:#0a0b0c}
+  .leaflet-container{background:#0a0b0c}
+  .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.72) contrast(1.05) saturate(0)}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--ink);color:var(--ground)}
+  .leaflet-popup-content{margin:9px 11px;font:13px/1.4 var(--body)} .pc{color:#55595e}
+  @media(max-width:760px){body{grid-template-columns:1fr;height:auto}#map{height:60vh}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<aside>
+  <a class="logo" href="/"><i></i>GOALBOUND</a>
+  <div><div class="eyebrow">Coaches</div><h1>Which towns' players actually play?</h1>
+    <p class="lede">Every hometown that sent players to this level, ranked by how many of them became starters — and how many never got on the field.</p></div>
+  <div class="row">
+    <div><label class="f" for="sport">Sport</label><select id="sport"><option value="MLA">Men's</option><option value="WLA">Women's</option></select></div>
+    <div><label class="f" for="div">Level</label><select id="div"><option value="1">Division I</option><option value="2">Division II</option><option value="3">Division III</option></select></div>
+  </div>
+  <div class="row">
+    <div><label class="f" for="conf">Recruited by</label><select id="conf"><option value="">All programs</option></select></div>
+    <div><label class="f" for="state">Home state</label><select id="state"><option value="">All</option></select></div>
+  </div>
+  <div class="row">
+    <div><label class="f" for="from">Seasons</label><select id="from"></select></div>
+    <div><label class="f" for="minn">Min players</label><select id="minn"><option value="10">10+</option><option value="15">15+</option><option value="25" selected>25+</option><option value="40">40+</option></select></div>
+  </div>
+  <div><label class="f" for="sort">Order</label><select id="sort"><option value="lo">Lowest starter share first — recruited, then sat</option><option value="hi">Highest starter share first — the towns that convert</option><option value="n">Most players first</option></select></div>
+  <div class="big"><div class="n" id="head">–</div><div class="k" id="headk">loading…</div></div>
+  <div class="grid3">
+    <div class="card"><div class="n" id="bStart">–</div><div class="k">start · baseline</div></div>
+    <div class="card"><div class="n" id="bRot">–</div><div class="k">rotation · baseline</div></div>
+    <div class="card"><div class="n" id="bBench">–</div><div class="k">bench · baseline</div></div>
+  </div>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--ink);box-shadow:0 0 0 3px rgba(244,244,242,.18)"></span>starts well above baseline</span>
+    <span><span class="sw" style="background:var(--dim)"></span>around baseline</span>
+    <span><span class="sw" style="background:#1a1c1f;border:1px solid var(--dim)"></span>well below · size = players</span>
+  </div>
+  <h2>Towns <span id="townsN"></span></h2>
+  <table id="towns"></table>
+  <h2>States <span>· D<span id="divS"></span> starter share</span></h2>
+  <table id="states"></table>
+  <h2 id="playersHdr" hidden>Players</h2>
+  <table id="players"></table>
+  <div class="status" id="status">Loading the query engine…</div>
+</aside>
+<div id="map"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module">
+// Same pattern as explore.html: DuckDB-WASM in the browser over the Parquet files in
+// /data, HTTP range requests, nothing server-side. Local test: serve public/ and open
+// this page from the same origin; ?data=<base> overrides the data host.
+import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm";
+
+const DATA_BASE = new URL((new URLSearchParams(location.search).get("data") || "/data"), location.origin).href.replace(/\/$/, "");
+const $ = id => document.getElementById(id);
+const status = t => $("status").innerHTML = t;
+const esc = s => String(s).replace(/'/g, "''");
+const pct = x => Math.round(x * 100);
+let db, conn, map, layer, meta, picked = null, markersByKey = new Map();
+
+async function boot() {
+  const bundles = duckdb.getJsDelivrBundles();
+  const bundle = await duckdb.selectBundle(bundles);
+  const worker = new Worker(URL.createObjectURL(new Blob([`importScripts("${bundle.mainWorker}");`], { type: "text/javascript" })));
+  db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING), worker);
+  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+  conn = await db.connect();
+  await conn.query(`create view ur as select * from read_parquet('${DATA_BASE}/under_recruited.parquet')`);
+  await conn.query(`create view sch as select * from read_parquet('${DATA_BASE}/schools.parquet')`);
+  await conn.query(`create view conf as select * from read_parquet('${DATA_BASE}/conferences.parquet')`);
+  try { meta = await (await fetch(`${DATA_BASE}/_manifest.json`)).json(); } catch { meta = null; }
+  // Seasons with tiers: team_games is null where a team has no stats, so those seasons drop out here.
+  const years = (await q(`select distinct year from ur where team_games >= 10 order by year`)).map(r => r.year);
+  const last = years[years.length - 1];
+  $("from").innerHTML = years.filter(y => y <= last).map(y => `<option value="${y}">${y}–${last}</option>`).join("");
+  $("from").value = years.includes(2022) ? "2022" : String(years[0]);
+  map = L.map("map", { scrollWheelZoom: true }).setView([39.5, -96], 4);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
+  // Leaflet measures the grid cell before layout; re-measure once it has a size.
+  requestAnimationFrame(() => map.invalidateSize());
+  ["sport", "div", "conf", "state", "from", "minn", "sort"].forEach(id => $(id).onchange = () => { picked = null; render().catch(err); });
+  await render();
+}
+const err = e => status(`<b>Query failed.</b> ${e.message}`);
+const q = async (sql) => (await conn.query(sql)).toArray().map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, typeof v === "bigint" ? Number(v) : v])));
+
+// Years with stats but partial seasons (2020 COVID, 2021 Ivy) are kept out by the
+// season-length floor in the export; team_games >= 10 repeats that guard here.
+function filters() {
+  const sport = $("sport").value, div = Number($("div").value), from = Number($("from").value);
+  const cf = $("conf").value, st = $("state").value;
+  let w = `u.sport_id='${sport}' and u.division=${div} and u.year>=${from} and u.team_games>=10 and u.town is not null and u.state is not null`;
+  if (cf) w += ` and u.conference_id=${Number(cf)}`;
+  if (st) w += ` and u.state='${esc(st)}'`;
+  return { sport, div, from, cf, st, w };
+}
+
+async function render() {
+  const f = filters(), minN = Number($("minn").value), sort = $("sort").value;
+  status("Querying…");
+  $("divS").textContent = f.div;
+
+  // Filter options for this sport/level/season window (keep the current pick if still valid).
+  const base = `u.sport_id='${f.sport}' and u.division=${f.div} and u.year>=${f.from} and u.team_games>=10`;
+  // Floor of 10 keeps mis-geocoded one-offs ("Hesse", "Sonora") out of the dropdown.
+  const states = await q(`select u.state from ur u where ${base} and u.state is not null group by 1 having count(*) >= 10 order by 1`);
+  const confs = await q(`select distinct c.id, c.name from ur u join conf c on c.id=u.conference_id where ${base} order by 2`);
+  const keep = (el, vals, cur, all) => { el.innerHTML = `<option value="">${all}</option>` + vals.map(v => `<option value="${v.v}">${v.t}</option>`).join(""); if (vals.some(v => String(v.v) === cur)) el.value = cur; };
+  keep($("state"), states.map(s => ({ v: s.state, t: s.state })), f.st, "All");
+  keep($("conf"), confs.map(c => ({ v: c.id, t: c.name })), f.cf, "All programs");
+
+  // Baseline for this cohort (all towns, no floor).
+  const [b] = await q(`select count(*) n, avg((u.tier='starter')::int) s, avg((u.tier='rotation')::int) r, avg((u.tier='bench')::int) b from ur u where ${f.w}`);
+  $("bStart").textContent = b.n ? pct(b.s) + "%" : "–"; $("bRot").textContent = b.n ? pct(b.r) + "%" : "–"; $("bBench").textContent = b.n ? pct(b.b) + "%" : "–";
+
+  const towns = await q(`
+    select u.town, u.state, median(u.lat) lat, median(u.lng) lng, count(*) n, count(distinct u.school_id) programs,
+           sum((u.tier='starter')::int) st, sum((u.tier='rotation')::int) rot, sum((u.tier='bench')::int) bench,
+           avg(coalesce(u.gp,0)::double/u.team_games) share_gp
+    from ur u where ${f.w}
+    group by 1,2 having count(*) >= ${minN}`);
+  for (const t of towns) { t.ps = t.st / t.n; t.pb = t.bench / t.n; t.key = t.town + "|" + t.state; }
+  const order = sort === "hi" ? (a, c) => c.ps - a.ps || c.n - a.n : sort === "lo" ? (a, c) => a.ps - c.ps || c.pb - a.pb || c.n - a.n : (a, c) => c.n - a.n;
+  towns.sort(order);
+
+  // Headline: the widest gap at this floor.
+  if (towns.length >= 2) {
+    const hi = [...towns].sort((a, c) => c.ps - a.ps || c.n - a.n)[0], lo = [...towns].sort((a, c) => a.ps - c.ps || c.pb - a.pb || c.n - a.n)[0];
+    $("head").textContent = `${pct(lo.ps)}% vs ${pct(hi.ps)}%`;
+    $("headk").innerHTML = `<b>${cap(lo.town)}, ${lo.state}</b> sent ${lo.n} players to D${f.div}${f.cf ? " programs in this conference" : ""} and ${pct(lo.ps)}% started. <b>${cap(hi.town)}, ${hi.state}</b> sent ${hi.n} and ${pct(hi.ps)}% started. Baseline ${pct(b.s)}%.`;
+  } else { $("head").textContent = towns.length; $("headk").textContent = `towns with ${minN}+ players match — lower the floor or widen the filters`; }
+
+  // Map: one circle per town, radius by players, tone by starter share vs baseline.
+  const tone = t => t.ps >= b.s * 1.5 ? "hi" : t.ps <= b.s * 0.5 ? "lo" : "mid";
+  const C = { hi: "#f4f4f2", mid: "#55595e", lo: "#1a1c1f" };
+  if (layer) map.removeLayer(layer);
+  markersByKey = new Map();
+  const ms = [];
+  for (const z of ["mid", "lo", "hi"]) for (const t of towns) {
+    if (tone(t) !== z || t.lat == null) continue;
+    const m = L.circleMarker([t.lat, t.lng], { radius: 3 + 2.2 * Math.sqrt(t.n), fillColor: C[z], fillOpacity: .9, color: z === "lo" ? "#55595e" : "#0a0b0c", weight: 1 })
+      .bindPopup(popup(t, f, b)).on("click", () => pick(t.key, false));
+    markersByKey.set(t.key, m); ms.push(m);
+  }
+  layer = L.layerGroup(ms).addTo(map);
+  // Fit to North America only: a handful of mis-geocoded hometowns (e.g. a "Victoria"
+  // in Australia) would otherwise pull the view out to the whole world.
+  const pts = ms.map(m => m.getLatLng()).filter(p => p.lat > 15 && p.lat < 62 && p.lng > -140 && p.lng < -50);
+  const fit = () => { map.invalidateSize(); map.fitBounds(L.latLngBounds(pts).pad(.12), { maxZoom: 9 }); };
+  if (pts.length) { fit(); requestAnimationFrame(() => { if (map.getZoom() <= 3) fit(); }); }
+
+  // Town table.
+  $("townsN").textContent = `· ${towns.length} with ${minN}+ players`;
+  const shown = towns.slice(0, 60);
+  $("towns").innerHTML = `<tr><th>Town</th><th>Players</th><th>Start</th><th>Bench</th></tr>` + shown.map(t =>
+    `<tr class="pick${t.key === picked ? " on" : ""}" data-key="${t.key}"><td>${cap(t.town)}<span class="st">${abbr(t.state)}</span></td><td class="r"><b>${t.n}</b> <span style="color:var(--dim)">/${t.programs}</span></td>` +
+    `<td class="r"><span class="barw"><span class="bar${t.ps < b.s ? " lo" : ""}" style="width:${Math.min(100, Math.round(t.ps / Math.max(0.01, b.s * 2.5) * 100))}%"></span></span> <b>${pct(t.ps)}%</b></td><td class="r">${pct(t.pb)}%</td></tr>`).join("") +
+    (towns.length > shown.length ? `<tr><td colspan="4" class="st">…${towns.length - shown.length} more — raise the floor or filter by state</td></tr>` : "");
+  document.querySelectorAll("#towns tr.pick").forEach(tr => tr.onclick = () => pick(tr.dataset.key, true));
+
+  // State table (no town floor — every player in the cohort).
+  const st = await q(`select u.state, count(*) n, avg((u.tier='starter')::int) s, avg((u.tier='bench')::int) b from ur u where ${f.w} group by 1 having count(*) >= 40 order by 3 desc`);
+  const mx = Math.max(...st.map(s => s.s), 0.01);
+  $("states").innerHTML = (f.st ? `<tr class="pick" data-state=""><td colspan="3" class="st">← all states</td></tr>` : "") + st.slice(0, 20).map(s =>
+    `<tr class="pick" data-state="${s.state}"><td style="width:44%">${s.state}</td><td><span class="barw" style="width:90px"><span class="bar" style="width:${Math.round(s.s / mx * 100)}%"></span></span></td><td class="r"><b>${pct(s.s)}%</b> · ${pct(s.b)}% bench · ${s.n}</td></tr>`).join("");
+  document.querySelectorAll("#states tr.pick").forEach(tr => tr.onclick = () => { $("state").value = tr.dataset.state; picked = null; render().catch(err); });
+
+  if (picked && towns.some(t => t.key === picked)) await players(picked, f); else { picked = null; $("playersHdr").hidden = true; $("players").innerHTML = ""; }
+  status(`<b>${b.n.toLocaleString()}</b> player-seasons · queried in the browser from Parquet${meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : ""}. ` +
+    `Starter = started ≥60% of team games · rotation = played ≥25% · bench = below that or no stats line. Seasons under 10 games excluded. A town is the hometown's city + state.`);
+}
+
+async function pick(key, fly) {
+  picked = key;
+  document.querySelectorAll("#towns tr.pick").forEach(tr => tr.classList.toggle("on", tr.dataset.key === key));
+  const m = markersByKey.get(key);
+  if (m && fly) { map.flyTo(m.getLatLng(), Math.max(map.getZoom(), 7), { duration: .6 }); m.openPopup(); }
+  await players(key, filters()).catch(err);
+}
+
+async function players(key, f) {
+  const [town, state] = key.split("|");
+  const rows = await q(`
+    select u.player_name, u.year, u.tier, u.gp, u.gs, u.team_games, s.display_name school
+    from ur u join sch s on s.id=u.school_id
+    where ${f.w} and u.town='${esc(town)}' and u.state='${esc(state)}'
+    order by case u.tier when 'starter' then 0 when 'rotation' then 1 else 2 end, u.year desc, u.player_name`);
+  $("playersHdr").hidden = false;
+  $("playersHdr").innerHTML = `Players <span>· ${cap(town)}, ${state} · ${rows.length}</span>`;
+  $("players").innerHTML = rows.map(r =>
+    `<tr><td>${r.player_name}<span class="st">${r.school}</span></td><td class="r">${r.year}</td><td class="r">${r.tier === "bench" ? `<span style="color:var(--dim)">bench</span>` : `<b>${r.gs}</b>/${r.gp} of ${r.team_games}`}</td></tr>`).join("");
+}
+
+function popup(t, f, b) {
+  return `<b>${cap(t.town)}, ${t.state}</b><br>${t.n} players at ${t.programs} D${f.div} program${t.programs === 1 ? "" : "s"} since ${f.from}<br>` +
+    `<b>${pct(t.ps)}%</b> started · ${pct(t.rot / t.n)}% rotation · ${pct(t.pb)}% bench<br><span class="pc">baseline ${pct(b.s)}% start · ${pct(b.b)}% bench · avg ${pct(t.share_gp)}% of games played</span>`;
+}
+const cap = s => String(s).replace(/\b\w/g, c => c.toUpperCase()).replace(/\bMt\.?\b/i, "Mt.").replace(/\bSt\.?\b/i, "St.");
+const AB = { "New York": "NY", "New Jersey": "NJ", "Maryland": "MD", "Connecticut": "CT", "Massachusetts": "MA", "Pennsylvania": "PA", "Virginia": "VA", "Ontario": "ON", "British Columbia": "BC", "California": "CA", "Florida": "FL", "Georgia": "GA", "Texas": "TX", "Colorado": "CO", "Ohio": "OH", "Michigan": "MI", "Illinois": "IL", "Minnesota": "MN", "North Carolina": "NC", "New Hampshire": "NH", "District Of Columbia": "DC", "Delaware": "DE", "Rhode Island": "RI", "Vermont": "VT", "Maine": "ME", "Oregon": "OR", "Washington": "WA", "Utah": "UT", "Alberta": "AB", "Missouri": "MO", "Indiana": "IN", "Wisconsin": "WI", "Tennessee": "TN", "South Carolina": "SC", "Kentucky": "KY", "Arizona": "AZ", "Nevada": "NV" };
+const abbr = s => AB[s] || s;
+boot().catch(e => status(`<b>Couldn't load the data.</b> ${e.message}`));
+</script>
+</body>
+</html>
