@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goalbound · Where players from your town went</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{--ground:#0a0b0c;--panel:#111214;--ink:#f4f4f2;--muted:#8b8f94;--dim:#55595e;--line:#222427;--home:#f2b705;
+    --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;--body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",Menlo,monospace}
+  *{box-sizing:border-box} html{color-scheme:dark}
+  body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--body);display:grid;grid-template-columns:380px 1fr;height:100vh}
+  aside{border-right:1px solid var(--line);overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  .logo{font:700 20px/1 var(--display);letter-spacing:.04em;text-decoration:none;display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .logo i{width:9px;height:9px;border-radius:50%;background:var(--ink)}
+  h1{font:700 25px/1.05 var(--display);margin:0}
+  .eyebrow{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  label.f{display:block;font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  select{width:100%;padding:7px 9px;font:13px var(--body);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:5px}
+  .headline{border:1px solid var(--line);border-left:2px solid var(--home);border-radius:7px;padding:13px 15px;background:#16140c}
+  .headline .n{font:700 34px/1 var(--display);color:var(--home)}
+  .headline .k{color:#c9b681;font-size:12.5px;margin-top:5px;line-height:1.4}
+  h2{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:6px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  td{padding:5px 0;vertical-align:baseline;border-bottom:1px solid #17191c}
+  td.n{text-align:right;font:500 13px var(--mono);color:var(--ink);white-space:nowrap;padding-left:10px}
+  td.d{font:500 10.5px var(--mono);color:var(--muted);white-space:nowrap;padding-left:8px}
+  tr.pick{cursor:pointer} tr.pick:hover td{color:var(--home)}
+  .players{font-size:12.5px;color:var(--muted);line-height:1.6}
+  .players b{color:var(--ink);font-weight:500}
+  .status{font:400 11.5px var(--mono);color:var(--muted);line-height:1.45} .status b{color:var(--ink);font-weight:500}
+  #map{height:100vh;background:#0a0b0c} .leaflet-container{background:#0a0b0c}
+  .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.72) contrast(1.05) saturate(0)}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--ink);color:var(--ground)}
+  .leaflet-popup-content{margin:9px 11px;font:13px/1.45 var(--body)} .pc{color:#55595e}
+  @media(max-width:760px){body{grid-template-columns:1fr;height:auto}#map{height:58vh}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<aside>
+  <a class="logo" href="/"><i></i>GOALBOUND</a>
+  <div><div class="eyebrow">For players and families</div><h1>Where do players from your town end up?</h1></div>
+
+  <div class="row">
+    <div><label class="f" for="state">State</label><select id="state"></select></div>
+    <div><label class="f" for="town">Town</label><select id="town"></select></div>
+  </div>
+  <div class="row">
+    <div><label class="f" for="radius">Include</label><select id="radius">
+      <option value="0">This town only</option><option value="25">Within 25 miles</option>
+      <option value="50">Within 50 miles</option><option value="100">Within 100 miles</option>
+      <option value="-1">The whole state</option></select></div>
+    <div><label class="f" for="sport">Sport</label><select id="sport">
+      <option value="">Both</option><option value="MLA">Men's</option><option value="WLA">Women's</option></select></div>
+  </div>
+
+  <div class="headline"><div class="n" id="nPlayers">–</div><div class="k" id="headk">loading…</div></div>
+
+  <h2>Where they went</h2>
+  <table id="schools"></table>
+
+  <h2 id="playersHdr">Players</h2>
+  <div class="players" id="players"></div>
+
+  <div class="status" id="status">Loading the query engine…</div>
+</aside>
+<div id="map"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module">
+import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm";
+const DATA = new URL((new URLSearchParams(location.search).get("data") || "/data"), location.origin).href.replace(/\/$/, "");
+const $ = id => document.getElementById(id);
+const status = t => $("status").innerHTML = t;
+const esc = s => String(s).replace(/'/g, "''");
+let conn, map, layer, meta, homeLL = null;
+
+// Seeded so the page opens on a real answer rather than an empty form.
+const SEED_STATE = "Vermont", SEED_TOWN = "South Burlington";
+
+async function boot() {
+  const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
+  const worker = new Worker(URL.createObjectURL(new Blob([`importScripts("${bundle.mainWorker}");`], { type: "text/javascript" })));
+  const db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING), worker);
+  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+  conn = await db.connect();
+  await conn.query(`create view h as select * from read_parquet('${DATA}/hometowns.parquet') where lat is not null`);
+  await conn.query(`create view sch as select * from read_parquet('${DATA}/schools.parquet')`);
+  try { meta = await (await fetch(`${DATA}/_manifest.json`)).json(); } catch { meta = null; }
+
+  const states = await q(`select state, count(distinct player_name) n from h where state is not null group by 1 order by 1`);
+  $("state").innerHTML = states.map(s => `<option value="${s.state}"${s.state === SEED_STATE ? " selected" : ""}>${s.state} (${s.n.toLocaleString()})</option>`).join("");
+  map = L.map("map", { scrollWheelZoom: true }).setView([44.45, -73.2], 7);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
+  await fillTowns(SEED_TOWN);
+  $("state").onchange = () => fillTowns().then(render).catch(fail);
+  ["town", "radius", "sport"].forEach(id => $(id).onchange = () => render().catch(fail));
+  await render();
+}
+const q = async sql => (await conn.query(sql)).toArray().map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, typeof v === "bigint" ? Number(v) : v])));
+
+async function fillTowns(preferred) {
+  const st = $("state").value;
+  const towns = await q(`select city, count(distinct player_name) n from h where state='${esc(st)}' and city is not null group by 1 order by 2 desc, 1`);
+  $("town").innerHTML = towns.map(t => `<option value="${t.city}">${t.city} (${t.n})</option>`).join("");
+  if (preferred && towns.some(t => t.city === preferred)) $("town").value = preferred;
+}
+
+// Great-circle miles from a point, as SQL. Every coordinate is wrapped in its own
+// parentheses: a negative longitude would otherwise render as `lng--73.17`, and `--`
+// opens a SQL line comment that swallows the remainder of the query.
+// Columns are qualified `h.` because this runs inside a join with sch, which
+// carries its own lat — an unqualified `lat` is an ambiguous reference there.
+const milesFrom = ([la, lo]) =>
+  `3959*2*asin(sqrt(pow(sin(radians(h.lat-(${la}))/2),2)`
+  + `+cos(radians((${la})))*cos(radians(h.lat))*pow(sin(radians(h.lng-(${lo}))/2),2)))`;
+
+// Leaflet measures a container that a CSS grid has not laid out yet and lands on
+// zoom 0 (the whole world). Re-measure, then re-fit on the next frame if it did.
+function fitTo(pts) {
+  if (!pts.length) return;
+  const bounds = L.latLngBounds(pts).pad(.15);
+  const go = () => { map.invalidateSize(); map.fitBounds(bounds); };
+  go();
+  requestAnimationFrame(() => { if (map.getZoom() <= 3) go(); });
+}
+
+async function render() {
+  const st = $("state").value, town = $("town").value, radius = Number($("radius").value), sport = $("sport").value;
+  status("Querying…");
+  const sportW = sport ? ` and h.sport_id='${sport}'` : "";
+
+  const home = (await q(`select avg(lat) la, avg(lng) lo from h where state='${esc(st)}' and city='${esc(town)}'`))[0];
+  homeLL = home && home.la != null ? [home.la, home.lo] : null;
+
+  // "This town" is an exact match; a radius is great-circle from the town centre;
+  // -1 is the whole state. Radius beats county here — the data has no county field,
+  // and a circle is closer to how anyone actually thinks about a recruiting area.
+  let where;
+  if (radius === -1) where = `h.state='${esc(st)}'`;
+  else if (radius === 0 || !homeLL) where = `h.state='${esc(st)}' and h.city='${esc(town)}'`;
+  else where = `${milesFrom(homeLL)} <= ${radius}`;
+
+  const rows = await q(`
+    select s.display_name school, s.division, s.lat slat, s.lon slon,
+           h.player_name, h.city, h.state, min(h.year) y0, max(h.year) y1, any_value(h.sport_id) sp
+    from h join sch s on s.id = h.school_id
+    where ${where}${sportW}
+    group by 1,2,3,4,5,6,7`);
+
+  const players = new Map();
+  for (const r of rows) players.set(`${r.player_name}|${r.school}`, r);
+  const list = [...players.values()];
+  const bySchool = new Map();
+  for (const r of list) {
+    const k = r.school;
+    if (!bySchool.has(k)) bySchool.set(k, { school: k, division: r.division, lat: r.slat, lon: r.slon, players: [] });
+    bySchool.get(k).players.push(r);
+  }
+  const schools = [...bySchool.values()].sort((a, b) => b.players.length - a.players.length || a.school.localeCompare(b.school));
+  const towns = new Set(list.map(r => `${r.city}, ${r.state}`));
+
+  const scope = radius === -1 ? `all of ${st}` : radius === 0 ? `${town}, ${st}` : `${radius} miles of ${town}, ${st}`;
+  $("nPlayers").textContent = list.length ? new Set(list.map(r => r.player_name)).size.toLocaleString() : "0";
+  $("headk").innerHTML = list.length
+    ? `players from <b style="color:#f4f4f2">${scope}</b> have played college lacrosse since 2015 — at <b style="color:#f4f4f2">${schools.length}</b> different programs`
+      + (radius > 0 ? `, across ${towns.size} towns` : "")
+    : `No college players recorded from ${scope} since 2015.`;
+
+  const d1 = schools.filter(s => s.division === 1).reduce((n, s) => n + s.players.length, 0);
+  $("schools").innerHTML = schools.slice(0, 40).map(s =>
+    `<tr class="pick" data-school="${s.school.replace(/"/g, "&quot;")}"><td>${s.school}</td>` +
+    `<td class="d">D${s.division}</td><td class="n">${s.players.length}</td></tr>`).join("")
+    || `<tr><td class="d">nothing to show</td></tr>`;
+
+  $("playersHdr").textContent = `Players (${list.length})`;
+  $("players").innerHTML = list.sort((a, b) => b.y1 - a.y1 || a.player_name.localeCompare(b.player_name)).slice(0, 60)
+    .map(r => `<div><b>${r.player_name}</b> · ${r.city} → ${r.school} <span class="pc">(D${r.division}, ${r.y0 === r.y1 ? r.y1 : r.y0 + "–" + r.y1})</span></div>`).join("")
+    || "—";
+
+  if (layer) map.removeLayer(layer);
+  const marks = [];
+  if (homeLL) marks.push(L.circleMarker(homeLL, { radius: 8, fillColor: "#f2b705", fillOpacity: 1, color: "#0a0b0c", weight: 2 })
+    .bindPopup(`<b>${town}, ${st}</b><br><span class="pc">home town</span>`));
+  for (const s of schools) {
+    if (s.lat == null) continue;
+    marks.push(L.circleMarker([s.lat, s.lon], {
+      radius: 4 + Math.min(s.players.length, 10) * 1.1,
+      fillColor: s.division === 1 ? "#f4f4f2" : s.division === 2 ? "#9aa4ad" : "#5b6b7c",
+      fillOpacity: .9, color: "#0a0b0c", weight: 1,
+    }).bindPopup(`<b>${s.school}</b> · D${s.division}<br>` +
+      s.players.slice(0, 12).map(p => `${p.player_name} <span class="pc">${p.y0 === p.y1 ? p.y1 : p.y0 + "–" + p.y1}</span>`).join("<br>") +
+      (s.players.length > 12 ? `<br><span class="pc">+${s.players.length - 12} more</span>` : "")));
+    if (homeLL) marks.push(L.polyline([homeLL, [s.lat, s.lon]], { color: "#f2b705", weight: 1, opacity: .22 }));
+  }
+  layer = L.layerGroup(marks).addTo(map);
+  fitTo(marks.filter(m => m.getLatLng).map(m => m.getLatLng()));
+
+  document.querySelectorAll("#schools tr.pick").forEach(tr => tr.onclick = () => {
+    const s = bySchool.get(tr.dataset.school);
+    if (s && s.lat != null) { map.setView([s.lat, s.lon], 8); marks.find(m => m.getLatLng && m.getLatLng().lat === s.lat)?.openPopup(); }
+  });
+  status(`<b>${list.length}</b> player-school records · ${d1} went D1 · queried in the browser from Parquet` +
+    (meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : "") +
+    `. Rosters run 2015–2026. There is no county in the source data, so distance is measured from the town centre.`);
+}
+function fail(e) { console.error(e); status(`<b>Query failed.</b> ${e.message}`); }
+boot().catch(e => { console.error(e); status(`<b>Couldn't load the data.</b> ${e.message}`); });
+</script>
+</body>
+</html>

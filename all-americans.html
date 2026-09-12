@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goalbound · Where All-Americans come from</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{--ground:#0a0b0c;--panel:#111214;--ink:#f4f4f2;--muted:#8b8f94;--dim:#55595e;--line:#222427;
+    --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;--body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",Menlo,monospace}
+  *{box-sizing:border-box} html{color-scheme:dark}
+  body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--body);display:grid;grid-template-columns:360px 1fr;height:100vh}
+  aside{border-right:1px solid var(--line);overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  .logo{font:700 20px/1 var(--display);letter-spacing:.04em;text-decoration:none;display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .logo i{width:9px;height:9px;border-radius:50%;background:var(--ink)}
+  h1{font:700 24px/1 var(--display);margin:0}
+  .eyebrow{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  label.f{display:block;font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  select{width:100%;padding:6px 8px;font:13px var(--body);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:5px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .seg button{flex:1;background:transparent;border:0;color:var(--muted);font:500 12px var(--mono);letter-spacing:.06em;padding:7px 10px;cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--ground)}
+  .note{border:1px solid var(--line);border-left:2px solid var(--muted);border-radius:6px;padding:10px 12px;font-size:12.5px;color:var(--muted);line-height:1.45} .note b{color:var(--ink);font-weight:500}
+  .big{border:1px solid var(--line);border-radius:7px;padding:12px 14px}
+  .big .n{font:700 34px/1 var(--display)} .big .k{color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.35}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .card{border:1px solid var(--line);border-radius:6px;padding:8px 9px} .card .n{font:700 18px/1 var(--display)} .card .k{font:11px var(--mono);color:var(--muted);margin-top:3px}
+  .toggles{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px} .toggles label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  .sw{width:9px;height:9px;border-radius:50%;display:inline-block}
+  h2{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:6px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px} td{padding:3px 0;vertical-align:baseline}
+  td.r{text-align:right;font:500 12px var(--mono);color:var(--muted);white-space:nowrap;padding-left:8px} td.r b{color:var(--ink)} tr.pick{cursor:pointer} tr.pick:hover td{color:var(--ink)} tr.pick td.n{color:var(--muted)}
+  .bar{height:5px;background:var(--ink);border-radius:2px;opacity:.85}
+  .status{font:400 11.5px var(--mono);color:var(--muted);line-height:1.45} .status b{color:var(--ink);font-weight:500}
+  #map{height:100vh;background:#0a0b0c} .leaflet-container{background:#0a0b0c}
+  .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.72) contrast(1.05) saturate(0)}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--ink);color:var(--ground)}
+  .leaflet-popup-content{margin:9px 11px;font:13px/1.4 var(--body)} .pc{color:#55595e}
+  @media(max-width:760px){body{grid-template-columns:1fr;height:auto}#map{height:60vh}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<aside>
+  <a class="logo" href="/"><i></i>GOALBOUND</a>
+  <div><div class="eyebrow">Explore</div><h1>Where All-Americans come from</h1></div>
+  <div class="seg" role="group" aria-label="Sport"><button type="button" data-sport="MLA" aria-pressed="true">MEN'S</button><button type="button" data-sport="WLA" aria-pressed="false">WOMEN'S</button></div>
+  <div class="note" id="note" hidden></div>
+  <div class="row">
+    <div><label class="f" for="div">Division</label><select id="div"><option value="23">D2 + D3</option><option value="3">Division III</option><option value="2">Division II</option><option value="1">Division I</option><option value="">All</option></select></div>
+    <div><label class="f" for="team">Team</label><select id="team"><option value="">All three</option><option value="First">First Team</option><option value="Second">Second Team</option><option value="Third">Third Team</option></select></div>
+  </div>
+  <div class="row">
+    <div><label class="f" for="from">From</label><select id="from"></select></div>
+    <div><label class="f" for="to">To</label><select id="to"></select></div>
+  </div>
+  <div><label class="f" for="state">Home state</label><select id="state"><option value="">All</option></select></div>
+  <div class="big"><div class="n" id="hot">–</div><div class="k" id="hotk">loading…</div></div>
+  <div class="grid3">
+    <div class="card"><div class="n" id="nAA">–</div><div class="k">All-Americans</div></div>
+    <div class="card"><div class="n" id="nMapped">–</div><div class="k">mapped</div></div>
+    <div class="card"><div class="n" id="nTowns">–</div><div class="k">hometowns</div></div>
+  </div>
+  <div class="toggles">
+    <label><input type="checkbox" id="tHot" checked><span class="sw" style="background:var(--ink);box-shadow:0 0 0 3px rgba(244,244,242,.18)"></span>Town has sent nobody to D1</label>
+    <label><input type="checkbox" id="tWarm" checked><span class="sw" style="background:var(--dim)"></span>Town feeds D1</label>
+  </div>
+  <h2>States · All-Americans from towns D1 never recruited</h2>
+  <table id="states"></table>
+  <div class="status" id="status">Loading the query engine…</div>
+</aside>
+<div id="map"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module">
+import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm";
+// DuckDB-WASM needs an absolute http(s) URL — a bare "/data" would be read as a filesystem path.
+const DATA_BASE = new URL((new URLSearchParams(location.search).get("data") || "/data"), location.origin).href.replace(/\/$/, "");   // /data ships with the site; point at the R2 host to update without redeploying
+const $ = id => document.getElementById(id);
+const status = t => $("status").innerHTML = t;
+let conn, map, layer, meta, sport = "MLA";
+
+async function boot() {
+  const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
+  const worker = new Worker(URL.createObjectURL(new Blob([`importScripts("${bundle.mainWorker}");`], { type: "text/javascript" })));
+  const db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING), worker);
+  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+  conn = await db.connect();
+  await conn.query(`create view aa as select * from read_parquet('${DATA_BASE}/all_american.parquet')`);
+  await conn.query(`create view homes as select * from read_parquet('${DATA_BASE}/hometowns.parquet')`);
+  await conn.query(`create view sch as select * from read_parquet('${DATA_BASE}/schools.parquet')`);
+  // Every hometown that has put anyone on a D1 roster, by sport and season — for the "feeds D1" flag.
+  await conn.query(`create table d1towns as
+     select distinct h.sport_id, h.year season, lower(trim(h.hometown_str)) town
+     from homes h join sch s on s.id = h.school_id where s.division = 1 and h.hometown_str is not null`);
+  try { meta = await (await fetch(`${DATA_BASE}/_manifest.json`)).json(); } catch { meta = null; }
+  const yrs = (await conn.query(`select min(year) lo, max(year) hi from aa`)).toArray()[0];
+  const lo = Number(yrs.lo), hi = Number(yrs.hi);
+  const opts = []; for (let y = hi; y >= lo; y--) opts.push(`<option value="${y}">${y}</option>`);
+  $("from").innerHTML = opts.join(""); $("to").innerHTML = opts.join("");
+  $("from").value = String(Math.max(lo, hi - 4)); $("to").value = String(hi);
+  map = L.map("map", { scrollWheelZoom: true }).setView([39.5, -96], 4);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
+  ["div", "team", "from", "to", "state", "tHot", "tWarm"].forEach(id => $(id).onchange = render);
+  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { sport = b.dataset.sport;
+    document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); render(); });
+  await render();
+}
+const q = async sql => (await conn.query(sql)).toArray().map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, typeof v === "bigint" ? Number(v) : v])));
+const esc = s => String(s).replace(/'/g, "''");
+
+async function render() {
+  const div = $("div").value, team = $("team").value, st = $("state").value;
+  let from = Number($("from").value), to = Number($("to").value); if (from > to) [from, to] = [to, from];
+  const note = $("note");
+  if (sport === "MLA") {
+    note.hidden = false;
+    note.innerHTML = `<b>Men's All-Americans cover 2015–2026</b> (USILA); 2020 is absent because COVID cancelled the postseason. The women's list runs 2015–2025.`;
+  } else note.hidden = true;
+  status("Querying…");
+  const divWhere = div === "23" ? `aa.division in ('D2','D3')` : div ? `aa.division = 'D${div}'` : "true";
+  const rows = await q(`
+    with a as (
+      select aa.player_name, aa.year, aa.school, aa.division, aa.team,
+             h.hometown_str hometown, h.state, h.lat, h.lng, h.school_id, lower(trim(h.hometown_str)) town
+      from aa left join homes h on h.sport_id = aa.sport_id and h.year = aa.year and lower(trim(h.player_name)) = lower(trim(aa.player_name))
+      where aa.sport_id = '${sport}' and ${divWhere} and aa.year between ${from} and ${to}
+        ${team ? `and aa.team = '${esc(team)}'` : ""})
+    select a.*, s.display_name school_display,
+           exists (select 1 from d1towns d where d.sport_id = '${sport}' and d.town = a.town and d.season between a.year - 5 and a.year) d1_feeder
+    from a left join sch s on s.id = a.school_id
+    ${st ? `where a.state = '${esc(st)}'` : ""}`);
+  const states = [...new Set(rows.map(r => r.state).filter(Boolean))].sort();
+  $("state").innerHTML = `<option value="">All</option>` + states.map(s => `<option value="${s}"${s === st ? " selected" : ""}>${s}</option>`).join("");
+  const mapped = rows.filter(r => r.lat != null), hot = mapped.filter(r => !r.d1_feeder);
+  $("nAA").textContent = rows.length.toLocaleString(); $("nMapped").textContent = mapped.length.toLocaleString();
+  $("nTowns").textContent = new Set(mapped.map(r => r.town)).size.toLocaleString();
+  $("hot").textContent = hot.length.toLocaleString();
+  $("hotk").textContent = rows.length
+    ? `${div === "23" ? "D2 and D3" : div ? "D" + div : "All-division"} All-Americans ${from}–${to} whose hometown put nobody on a D1 roster in the prior six seasons — ${Math.round(hot.length / Math.max(mapped.length, 1) * 100)}% of those mapped`
+    : "No selections match these filters.";
+  if (layer) map.removeLayer(layer);
+  const show = { hot: $("tHot").checked, warm: $("tWarm").checked }, seen = new Map(), ms = [];
+  for (const b of ["warm", "hot"]) for (const r of mapped) {
+    const isHot = !r.d1_feeder; if ((isHot ? "hot" : "warm") !== b || !show[b]) continue;
+    const k = r.lat.toFixed(3) + "," + r.lng.toFixed(3), n = seen.get(k) || 0; seen.set(k, n + 1);
+    const a = n * 2.399963, rad = 0.045 * Math.sqrt(n);
+    const la = n ? r.lat + rad * Math.cos(a) : r.lat, ln = n ? r.lng + rad * Math.sin(a) * 1.35 : r.lng;
+    const rr = r.team === "First" ? 6.5 : r.team === "Second" ? 5.5 : 4.5;
+    ms.push(L.circleMarker([la, ln], { radius: rr, fillColor: isHot ? "#f4f4f2" : "#55595e", fillOpacity: .9, color: "#0a0b0c", weight: 1 })
+      .bindPopup(`<b>${r.player_name}</b> · ${r.year} ${r.division} ${r.team} Team<br><span class="pc">${r.school_display || r.school}</span><br><span class="pc">${r.hometown ?? ""}</span>` +
+        (isHot ? `<br><b>No D1 program recruited from this town</b>` : "")));
+  }
+  layer = L.layerGroup(ms).addTo(map);
+  const pts = ms.map(m => m.getLatLng()); if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(.12));
+  const by = {};
+  for (const r of mapped) { const k = r.state || "?"; by[k] = by[k] || { hot: 0, all: 0 }; by[k].all++; if (!r.d1_feeder) by[k].hot++; }
+  const top = Object.entries(by).sort((a, b) => b[1].hot - a[1].hot).slice(0, 12), max = top[0]?.[1].hot || 1;
+  $("states").innerHTML = (st ? `<tr class="pick" data-state=""><td colspan="3" class="n">← all states</td></tr>` : "") + top.map(([s, v]) => `<tr class="pick" data-state="${s}"><td style="width:40%">${s}</td><td><div class="bar" style="width:${Math.round(v.hot / max * 100)}%"></div></td><td class="r"><b>${v.hot}</b> / ${v.all}</td></tr>`).join("");
+  document.querySelectorAll("#states tr.pick").forEach(tr => tr.onclick = () => { $("state").value = tr.dataset.state; render(); });
+  status(`<b>${rows.length.toLocaleString()}</b> selections, ${mapped.length.toLocaleString()} matched to a roster hometown${meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : ""}. Marker size = First / Second / Third Team. "Feeds D1" = any D1 roster player from that town in the prior six seasons.`);
+}
+boot().catch(e => status(`<b>Couldn't load the data.</b> ${e.message}`));
+</script>
+</body>
+</html>

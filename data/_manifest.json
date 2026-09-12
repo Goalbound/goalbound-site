@@ -1,0 +1,37 @@
+{
+ "generated_at": "2026-09-12T02:41:19.141308+00:00",
+ "tables": {
+  "schools": {
+   "rows": 1092,
+   "bytes": 74974
+  },
+  "conferences": {
+   "rows": 139,
+   "bytes": 3864
+  },
+  "teams": {
+   "rows": 915,
+   "bytes": 6077
+  },
+  "rosters": {
+   "rows": 302485,
+   "bytes": 4237852
+  },
+  "hometowns": {
+   "rows": 272583,
+   "bytes": 3659010
+  },
+  "stats": {
+   "rows": 274728,
+   "bytes": 3937326
+  },
+  "all_american": {
+   "rows": 4664,
+   "bytes": 48354
+  },
+  "under_recruited": {
+   "rows": 188295,
+   "bytes": 3047416
+  }
+ }
+}
