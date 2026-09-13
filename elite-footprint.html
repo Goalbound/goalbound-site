@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goalbound · Elite footprint</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{--ground:#0a0b0c;--panel:#111214;--ink:#f4f4f2;--muted:#8b8f94;--dim:#55595e;--line:#222427;
+    --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;--body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",Menlo,monospace}
+  *{box-sizing:border-box} html{color-scheme:dark}
+  body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--body);display:grid;grid-template-columns:400px 1fr;height:100vh}
+  aside{border-right:1px solid var(--line);overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  .logo{font:700 20px/1 var(--display);letter-spacing:.04em;text-decoration:none;display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .logo i{width:9px;height:9px;border-radius:50%;background:var(--ink)}
+  h1{font:700 24px/1 var(--display);margin:0}
+  .eyebrow{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .lede{color:var(--muted);font-size:12.5px;line-height:1.45;margin:4px 0 0}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  label.f{display:block;font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  select{width:100%;padding:6px 8px;font:13px var(--body);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:5px}
+  .big{border:1px solid var(--line);border-radius:7px;padding:12px 14px}
+  .big .n{font:700 34px/1 var(--display)} .big .k{color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.35} .big .k b{color:var(--ink);font-weight:500}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .card{border:1px solid var(--line);border-radius:6px;padding:8px 9px} .card .n{font:700 18px/1 var(--display)} .card .k{font:11px var(--mono);color:var(--muted);margin-top:3px;line-height:1.35}
+  .seg{display:flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .seg button{flex:1;background:transparent;border:0;color:var(--muted);font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:7px 6px;cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--ground)}
+  h2{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:6px 0 0;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+  h2 span{letter-spacing:0;text-transform:none;font-weight:400}
+  table{width:100%;border-collapse:collapse;font-size:12.5px} td,th{padding:3px 0;vertical-align:baseline}
+  th{font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);text-align:right;padding-left:8px} th:first-child{text-align:left;padding-left:0}
+  td.r{text-align:right;font:500 12px var(--mono);color:var(--muted);white-space:nowrap;padding-left:8px} td.r b{color:var(--ink)}
+  tr.pick{cursor:pointer} tr.pick:hover td{color:var(--ink)} tr.pick.on td{color:var(--ink)} tr.pick.on td:first-child{text-decoration:underline}
+  td.st{color:var(--muted);font-size:11.5px;padding-left:6px}
+  .barw{width:64px;height:5px;background:var(--line);border-radius:2px;display:inline-block;vertical-align:middle;position:relative} .bar{position:absolute;left:0;top:0;height:5px;background:var(--ink);border-radius:2px} .bar.lo{background:var(--dim)}
+  .status{font:400 11.5px var(--mono);color:var(--muted);line-height:1.45} .status b{color:var(--ink);font-weight:500}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)} .legend span{display:flex;align-items:center;gap:6px}
+  .sw{width:10px;height:10px;border-radius:50%;display:inline-block}
+  #map{height:100vh;background:#0a0b0c}
+  .leaflet-container{background:#0a0b0c}
+  .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.72) contrast(1.05) saturate(0)}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--ink);color:var(--ground)}
+  .leaflet-popup-content{margin:9px 11px;font:13px/1.4 var(--body)} .pc{color:#55595e}
+  @media(max-width:760px){body{grid-template-columns:1fr;height:auto}#map{height:60vh}aside{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<aside>
+  <a class="logo" href="/"><i></i>GOALBOUND</a>
+  <div><div class="eyebrow">Coaches</div><h1>Where the top-10 recruit — and where they don't</h1>
+    <p class="lede">The ten best Division I programs each season draw from a narrower map than everyone else. See their towns, the towns of D1 starters they have never touched, and how your own program overlaps.</p></div>
+  <div class="row">
+    <div><label class="f" for="sport">Sport</label><select id="sport"><option value="MLA">Men's</option><option value="WLA">Women's</option></select></div>
+    <div><label class="f" for="from">Seasons</label><select id="from"></select></div>
+  </div>
+  <div><label class="f" for="mine">My program <span style="color:var(--dim);text-transform:none;letter-spacing:0">· optional</span></label><select id="mine"><option value="">— none —</option></select></div>
+  <div class="seg" role="group" aria-label="View">
+    <button type="button" data-view="elite" aria-pressed="true">Elite towns</button>
+    <button type="button" data-view="ignored" aria-pressed="false">Starter towns they ignore</button>
+  </div>
+  <div class="big"><div class="n" id="head">–</div><div class="k" id="headk">loading…</div></div>
+  <div class="grid2">
+    <div class="card"><div class="n" id="cEl">–</div><div class="k">of elite rosters from their 25 biggest towns</div></div>
+    <div class="card"><div class="n" id="cRest">–</div><div class="k">of the rest of D1 from its 25 biggest towns</div></div>
+  </div>
+  <div class="legend" id="legend"></div>
+  <h2 id="tblHdr">Towns <span id="townsN"></span></h2>
+  <table id="towns"></table>
+  <h2>States <span>· elite share ÷ rest-of-D1 share</span></h2>
+  <table id="states"></table>
+  <h2>Who counts as elite <span>· seasons in the top 10</span></h2>
+  <table id="elite"></table>
+  <h2 id="playersHdr" hidden>Players</h2>
+  <table id="players"></table>
+  <div class="status" id="status">Loading the query engine…</div>
+</aside>
+<div id="map"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module">
+// DuckDB-WASM in the browser over the Parquet files in /data, like explore.html and
+// town-yield.html. elite.parquet holds the top-10 school ids per sport-season, ranked by
+// All-American selections (win% tie-break) — publish/export.py. The roster base is
+// hometowns.parquet (2015–2025, geocoded) plus under_recruited.parquet for 2026.
+import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm";
+
+const DATA_BASE = new URL((new URLSearchParams(location.search).get("data") || "/data"), location.origin).href.replace(/\/$/, "");
+const $ = id => document.getElementById(id);
+const status = t => $("status").innerHTML = t;
+const esc = s => String(s).replace(/'/g, "''");
+const pct = x => Math.round(x * 100);
+let conn, map, layer, meta, view = "elite", picked = null, markersByKey = new Map();
+
+async function boot() {
+  const bundles = duckdb.getJsDelivrBundles();
+  const bundle = await duckdb.selectBundle(bundles);
+  const worker = new Worker(URL.createObjectURL(new Blob([`importScripts("${bundle.mainWorker}");`], { type: "text/javascript" })));
+  const db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING), worker);
+  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+  conn = await db.connect();
+  for (const [v, f] of [["el", "elite"], ["ht", "hometowns"], ["ur", "under_recruited"], ["sch", "schools"], ["conf", "conferences"]])
+    await conn.query(`create view ${v} as select * from read_parquet('${DATA_BASE}/${f}.parquet')`);
+  // One D1 roster base, 2015–2026, town keyed as city + state. Materialised once; the
+  // 2020/2021 seasons are dropped to match the elite ranking.
+  await conn.query(`
+    create table d1 as
+    select b.sport_id, b.year, b.school_id, b.player_name, b.town, b.state, b.lat, b.lng, b.tier,
+           (e.school_id is not null) elite
+    from (
+      select h.sport_id, h.year, h.school_id, h.player_name, lower(trim(split_part(h.hometown_str, ',', 1))) town,
+             h.state, h.lat, h.lng, null::varchar tier
+      from ht h where h.year < 2020 and h.state is not null
+      union all
+      select u.sport_id, u.year, u.school_id, u.player_name, u.town, u.state, u.lat, u.lng, u.tier
+      from ur u where u.state is not null) b
+    join sch s on s.id = b.school_id and s.division = 1
+    left join el e on e.sport_id = b.sport_id and e.year = b.year and e.school_id = b.school_id
+    where b.year not in (2020, 2021)`);
+  try { meta = await (await fetch(`${DATA_BASE}/_manifest.json`)).json(); } catch { meta = null; }
+  const years = (await q(`select distinct year from d1 order by year`)).map(r => r.year), last = years[years.length - 1];
+  $("from").innerHTML = years.map(y => `<option value="${y}">${y}–${last}</option>`).join("");
+  $("from").value = String(years[0]);
+  map = L.map("map", { scrollWheelZoom: true }).setView([39.5, -96], 4);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
+  requestAnimationFrame(() => map.invalidateSize());
+  ["sport", "from", "mine"].forEach(id => $(id).onchange = () => { if (id !== "mine") picked = null; render().catch(err); });
+  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { view = b.dataset.view; document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); picked = null; render().catch(err); });
+  await render();
+}
+const err = e => status(`<b>Query failed.</b> ${e.message}`);
+const q = async (sql) => (await conn.query(sql)).toArray().map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, typeof v === "bigint" ? Number(v) : v])));
+
+function filters() {
+  const sport = $("sport").value, from = Number($("from").value), mine = $("mine").value ? Number($("mine").value) : null;
+  return { sport, from, mine, w: `d.sport_id='${sport}' and d.year>=${from}` };
+}
+
+async function render() {
+  const f = filters();
+  status("Querying…");
+
+  // "My program" options: every D1 school with players in this window (keep the pick).
+  const schools = await q(`select distinct s.id, s.display_name from d1 d join sch s on s.id=d.school_id where ${f.w} order by 2`);
+  const cur = $("mine").value;
+  $("mine").innerHTML = `<option value="">— none —</option>` + schools.map(s => `<option value="${s.id}">${s.display_name}</option>`).join("");
+  if (schools.some(s => String(s.id) === cur)) $("mine").value = cur;
+
+  // Concentration: share of players from the 25 biggest towns, elite vs rest.
+  const conc = await q(`
+    with t as (select d.elite, d.town, d.state, count(*) n from d1 d where ${f.w} group by 1,2,3),
+         tot as (select elite, sum(n)::bigint t, count(*)::bigint towns from t group by 1),
+         r as (select elite, n, row_number() over (partition by elite order by n desc) rk from t)
+    select r.elite, tot.t players, tot.towns, (sum(case when rk<=25 then n else 0 end)::double)/tot.t top25, (sum(case when rk<=100 then n else 0 end)::double)/tot.t top100
+    from r join tot using(elite) group by 1,2,3`);
+  const ce = conc.find(c => c.elite), cr = conc.find(c => !c.elite);
+  $("cEl").textContent = ce ? pct(ce.top25) + "%" : "–"; $("cRest").textContent = cr ? pct(cr.top25) + "%" : "–";
+
+  // Towns: elite count, elite programmes, rest count, mine count, starters 2022+.
+  const towns = await q(`
+    select d.town, d.state, median(d.lat) lat, median(d.lng) lng,
+           sum(d.elite::int)::bigint el, count(distinct case when d.elite then d.school_id end) el_prog,
+           sum((not d.elite)::int)::bigint rest, count(distinct d.school_id) progs,
+           ${f.mine ? `sum((d.school_id=${f.mine})::int)::bigint` : `0::bigint`} mine,
+           ${f.mine ? `sum((d.elite and d.school_id<>${f.mine})::int)::bigint` : `sum(d.elite::int)::bigint`} el_other,
+           sum((d.tier='starter')::int)::bigint starters, count(distinct case when d.tier='starter' then d.school_id end) st_prog
+    from d1 d where ${f.w} group by 1,2`);
+  for (const t of towns) t.key = t.town + "|" + t.state;
+  const elite = towns.filter(t => t.el > 0).sort((a, b) => b.el - a.el || b.el_prog - a.el_prog || b.rest - a.rest);
+  const ignored = towns.filter(t => t.el === 0 && t.starters >= 5).sort((a, b) => b.starters - a.starters || b.st_prog - a.st_prog);
+  const list = view === "elite" ? elite : ignored;
+
+  // Headline.
+  const eliteN = ce?.players || 0, top25 = elite.slice(0, 25).reduce((s, t) => s + t.el, 0);
+  if (view === "elite") {
+    $("head").textContent = `${elite.length.toLocaleString()} towns`;
+    $("headk").innerHTML = `supply the top-10 programs${ce ? `, and <b>${pct(top25 / eliteN)}%</b> of their ${eliteN.toLocaleString()} players come from just 25 of them. The rest of D1 draws ${pct(cr.top25)}% from its own top 25.` : "."}`;
+  } else {
+    const st = ignored.reduce((s, t) => s + t.starters, 0);
+    $("head").textContent = `${ignored.length.toLocaleString()} towns`;
+    $("headk").innerHTML = `produced <b>${st.toLocaleString()} D1 starters</b> since 2022 (five or more each) without a single top-10 program taking a player from them${f.from < 2022 ? ` in ${f.from}–${meta ? meta.generated_at.slice(0, 4) : "2026"}` : ""}.`;
+  }
+  if (f.mine) {
+    const m = towns.filter(t => t.mine > 0), overlap = m.filter(t => t.el_other > 0).reduce((s, t) => s + t.mine, 0), tot = m.reduce((s, t) => s + t.mine, 0);
+    const name = schools.find(s => s.id === f.mine)?.display_name || "your program";
+    $("headk").innerHTML += ` <br><b>${name}</b>: ${tot} players from ${m.length} towns; <b>${pct(overlap / Math.max(tot, 1))}%</b> from towns other top-10 programs also recruit.`;
+  }
+
+  // Map.
+  if (layer) map.removeLayer(layer);
+  markersByKey = new Map();
+  const ms = [];
+  const draw = (t, opts, html) => { if (t.lat == null) return; const m = L.circleMarker([t.lat, t.lng], opts).bindPopup(html).on("click", () => pick(t.key, false)); markersByKey.set(t.key, m); ms.push(m); };
+  if (view === "elite") {
+    for (const t of elite) draw(t, { radius: 3 + 2.4 * Math.sqrt(t.el), fillColor: "#f4f4f2", fillOpacity: .9, color: "#0a0b0c", weight: 1 },
+      `<b>${cap(t.town)}, ${t.state}</b><br>${t.el} player${t.el === 1 ? "" : "s"} at ${t.el_prog} top-10 program${t.el_prog === 1 ? "" : "s"}<br><span class="pc">${t.rest} at the rest of D1${f.mine ? ` · ${t.mine} at your program` : ""}</span>`);
+    $("legend").innerHTML = `<span><span class="sw" style="background:var(--ink)"></span>town on a top-10 roster · size = players</span>` + (f.mine ? `<span><span class="sw" style="background:transparent;border:2px solid #f4f4f2"></span>your program recruits here too</span>` : "");
+    if (f.mine) for (const t of towns.filter(t => t.mine > 0)) draw(t, { radius: 4 + 2.4 * Math.sqrt(t.mine), fillColor: "transparent", fillOpacity: 0, color: "#f4f4f2", weight: 2, dashArray: t.el_other ? null : "3 3" },
+      `<b>${cap(t.town)}, ${t.state}</b><br>${t.mine} of your players<br><span class="pc">${t.el_other ? `${t.el_other} at other top-10 programs` : "no other top-10 program recruits here"}</span>`);
+  } else {
+    for (const t of ignored) draw(t, { radius: 3 + 2.4 * Math.sqrt(t.starters), fillColor: "#f4f4f2", fillOpacity: .9, color: "#0a0b0c", weight: 1 },
+      `<b>${cap(t.town)}, ${t.state}</b><br>${t.starters} D1 starters since 2022 at ${t.st_prog} program${t.st_prog === 1 ? "" : "s"}<br><span class="pc">zero top-10 players ${f.from}–present${f.mine ? ` · ${t.mine} at your program` : ""}</span>`);
+    $("legend").innerHTML = `<span><span class="sw" style="background:var(--ink)"></span>D1 starters, never a top-10 recruit · size = starters</span>`;
+  }
+  layer = L.layerGroup(ms).addTo(map);
+  const pts = ms.map(m => m.getLatLng()).filter(p => p.lat > 15 && p.lat < 62 && p.lng > -140 && p.lng < -50);
+  const fit = () => { map.invalidateSize(); if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(.1), { maxZoom: 8, animate: false }); };
+  fit(); requestAnimationFrame(() => { if (map.getZoom() <= 3) fit(); });
+
+  // Town table.
+  const shown = list.slice(0, 50);
+  $("townsN").textContent = view === "elite" ? `· ${elite.length} on top-10 rosters` : `· ${ignored.length} with 5+ starters, no top-10 player`;
+  $("towns").innerHTML = (view === "elite"
+    ? `<tr><th>Town</th><th>Top-10</th><th>Progs</th><th>Rest of D1</th>${f.mine ? "<th>You</th>" : ""}</tr>` + shown.map(t =>
+      `<tr class="pick${t.key === picked ? " on" : ""}" data-key="${t.key}"><td>${cap(t.town)}<span class="st">${abbr(t.state)}</span></td><td class="r"><b>${t.el}</b></td><td class="r">${t.el_prog}</td><td class="r">${t.rest}</td>${f.mine ? `<td class="r">${t.mine || ""}</td>` : ""}</tr>`).join("")
+    : `<tr><th>Town</th><th>Starters</th><th>Progs</th><th>All D1</th>${f.mine ? "<th>You</th>" : ""}</tr>` + shown.map(t =>
+      `<tr class="pick${t.key === picked ? " on" : ""}" data-key="${t.key}"><td>${cap(t.town)}<span class="st">${abbr(t.state)}</span></td><td class="r"><b>${t.starters}</b></td><td class="r">${t.st_prog}</td><td class="r">${t.rest}</td>${f.mine ? `<td class="r">${t.mine || ""}</td>` : ""}</tr>`).join(""))
+    + (list.length > shown.length ? `<tr><td colspan="5" class="st">…${list.length - shown.length} more</td></tr>` : "");
+  document.querySelectorAll("#towns tr.pick").forEach(tr => tr.onclick = () => pick(tr.dataset.key, true));
+
+  // State index.
+  const st = await q(`
+    with g as (select d.elite, d.state, count(*) n from d1 d where ${f.w} group by 1,2), tot as (select elite, sum(n)::bigint t from g group by 1)
+    select g.state, sum(case when g.elite then n end)::bigint el, max(case when g.elite then n::double/t end) es, max(case when not g.elite then n::double/t end) rs
+    from g join tot using(elite) group by 1 having sum(case when g.elite then n end) >= 20 order by es/rs desc`);
+  $("states").innerHTML = st.map(s => { const idx = s.es / s.rs; return `<tr><td style="width:44%">${s.state}</td><td><span class="barw"><span class="bar${idx < 1 ? " lo" : ""}" style="width:${Math.min(100, Math.round(idx / 2 * 100))}%"></span></span></td><td class="r"><b>${idx.toFixed(2)}</b> · ${(s.es * 100).toFixed(1)}% vs ${(s.rs * 100).toFixed(1)}%</td></tr>`; }).join("");
+
+  // Who counts as elite.
+  const who = await q(`select s.display_name, count(*) n, list(e.year order by e.year) yrs from el e join sch s on s.id=e.school_id where e.sport_id='${f.sport}' and e.year>=${f.from} group by 1 order by 2 desc, 1 limit 14`);
+  $("elite").innerHTML = who.map(w => `<tr><td>${w.display_name}</td><td class="r"><b>${w.n}</b> <span style="color:var(--dim)">${w.yrs.toArray ? w.yrs.toArray().join(" ") : String(w.yrs).replace(/[\[\],]/g, " ")}</span></td></tr>`).join("");
+
+  if (picked && list.some(t => t.key === picked)) await players(picked, f); else { picked = null; $("playersHdr").hidden = true; $("players").innerHTML = ""; }
+  const nSeasons = (await q(`select count(distinct year) n from d1 d where ${f.w}`))[0].n;
+  status(`<b>${((ce?.players || 0) + (cr?.players || 0)).toLocaleString()}</b> D1 player-seasons over ${nSeasons} seasons · queried in the browser from Parquet${meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : ""}. ` +
+    `Top-10 = the ten D1 programs with the most All-American selections that season (win% as tie-break); 2020 and 2021 skipped. Starter = started ≥60% of team games. A town is the hometown's city + state.`);
+}
+
+async function pick(key, fly) {
+  picked = key;
+  document.querySelectorAll("#towns tr.pick").forEach(tr => tr.classList.toggle("on", tr.dataset.key === key));
+  const m = markersByKey.get(key);
+  if (m && fly) { map.flyTo(m.getLatLng(), Math.max(map.getZoom(), 7), { duration: .6 }); m.openPopup(); }
+  await players(key, filters()).catch(err);
+}
+async function players(key, f) {
+  const [town, state] = key.split("|");
+  const rows = await q(`
+    select d.player_name, d.year, d.elite, d.tier, s.display_name school
+    from d1 d join sch s on s.id=d.school_id
+    where ${f.w} and d.town='${esc(town)}' and d.state='${esc(state)}'
+    order by d.elite desc, d.year desc, d.player_name`);
+  $("playersHdr").hidden = false;
+  $("playersHdr").innerHTML = `Players <span>· ${cap(town)}, ${state} · ${rows.length}</span>`;
+  $("players").innerHTML = rows.map(r => `<tr><td>${r.player_name}<span class="st">${r.school}</span></td><td class="r">${r.year}</td><td class="r">${r.elite ? "<b>top-10</b>" : (r.tier === "starter" ? "starter" : "")}</td></tr>`).join("");
+}
+const cap = s => String(s).replace(/\b\w/g, c => c.toUpperCase()).replace(/\bMt\.?\b/i, "Mt.").replace(/\bSt\.?\b/i, "St.");
+const AB = { "New York": "NY", "New Jersey": "NJ", "Maryland": "MD", "Connecticut": "CT", "Massachusetts": "MA", "Pennsylvania": "PA", "Virginia": "VA", "Ontario": "ON", "British Columbia": "BC", "California": "CA", "Florida": "FL", "Georgia": "GA", "Texas": "TX", "Colorado": "CO", "Ohio": "OH", "Michigan": "MI", "Illinois": "IL", "Minnesota": "MN", "North Carolina": "NC", "New Hampshire": "NH", "District Of Columbia": "DC", "Delaware": "DE", "Rhode Island": "RI", "Vermont": "VT", "Maine": "ME", "Oregon": "OR", "Washington": "WA", "Utah": "UT", "Alberta": "AB", "Missouri": "MO", "Indiana": "IN", "Wisconsin": "WI", "Tennessee": "TN", "South Carolina": "SC", "Kentucky": "KY", "Arizona": "AZ", "Nevada": "NV" };
+const abbr = s => AB[s] || s;
+boot().catch(e => status(`<b>Couldn't load the data.</b> ${e.message}`));
+</script>
+</body>
+</html>

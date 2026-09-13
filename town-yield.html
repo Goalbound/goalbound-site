@@ -188,7 +188,7 @@ async function render() {
   // Fit to North America only: a handful of mis-geocoded hometowns (e.g. a "Victoria"
   // in Australia) would otherwise pull the view out to the whole world.
   const pts = ms.map(m => m.getLatLng()).filter(p => p.lat > 15 && p.lat < 62 && p.lng > -140 && p.lng < -50);
-  const fit = () => { map.invalidateSize(); map.fitBounds(L.latLngBounds(pts).pad(.12), { maxZoom: 9 }); };
+  const fit = () => { map.invalidateSize(); map.fitBounds(L.latLngBounds(pts).pad(.12), { maxZoom: 9, animate: false }); };
   if (pts.length) { fit(); requestAnimationFrame(() => { if (map.getZoom() <= 3) fit(); }); }
 
   // Town table.

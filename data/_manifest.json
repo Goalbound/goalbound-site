@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-12T23:39:40.436080+00:00",
+ "generated_at": "2026-09-12T23:54:07.479184+00:00",
  "tables": {
   "schools": {
    "rows": 1092,
@@ -31,7 +31,11 @@
   },
   "under_recruited": {
    "rows": 188295,
-   "bytes": 3308621
+   "bytes": 3319308
+  },
+  "elite": {
+   "rows": 199,
+   "bytes": 2694
   }
  }
 }
