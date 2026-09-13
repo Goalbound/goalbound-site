@@ -92,10 +92,11 @@ async function boot() {
   await conn.query(`create view aa as select * from read_parquet('${DATA_BASE}/all_american.parquet')`);
   await conn.query(`create view homes as select * from read_parquet('${DATA_BASE}/hometowns.parquet')`);
   await conn.query(`create view sch as select * from read_parquet('${DATA_BASE}/schools.parquet')`);
-  // Every hometown that has put anyone on a D1 roster, by sport and season — for the "feeds D1" flag.
+  // Every town (canonical city + state key from the export, so spellings and named
+  // sections are already folded) that has put anyone on a D1 roster, by sport and season.
   await conn.query(`create table d1towns as
-     select distinct h.sport_id, h.year season, lower(trim(h.hometown_str)) town
-     from homes h join sch s on s.id = h.school_id where s.division = 1 and h.hometown_str is not null`);
+     select distinct h.sport_id, h.year season, h.town, h.state
+     from homes h join sch s on s.id = h.school_id where s.division = 1 and h.town is not null`);
   try { meta = await (await fetch(`${DATA_BASE}/_manifest.json`)).json(); } catch { meta = null; }
   const yrs = (await conn.query(`select min(year) lo, max(year) hi from aa`)).toArray()[0];
   const lo = Number(yrs.lo), hi = Number(yrs.hi);
@@ -125,12 +126,12 @@ async function render() {
   const rows = await q(`
     with a as (
       select aa.player_name, aa.year, aa.school, aa.division, aa.team,
-             h.hometown_str hometown, h.state, h.lat, h.lng, h.school_id, lower(trim(h.hometown_str)) town
+             h.hometown_str hometown, h.state, h.lat, h.lng, h.school_id, h.town
       from aa left join homes h on h.sport_id = aa.sport_id and h.year = aa.year and lower(trim(h.player_name)) = lower(trim(aa.player_name))
       where aa.sport_id = '${sport}' and ${divWhere} and aa.year between ${from} and ${to}
         ${team ? `and aa.team = '${esc(team)}'` : ""})
     select a.*, s.display_name school_display,
-           exists (select 1 from d1towns d where d.sport_id = '${sport}' and d.town = a.town and d.season between a.year - 5 and a.year) d1_feeder
+           exists (select 1 from d1towns d where d.sport_id = '${sport}' and d.town = a.town and d.state = a.state and d.season between a.year - 5 and a.year) d1_feeder
     from a left join sch s on s.id = a.school_id
     ${st ? `where a.state = '${esc(st)}'` : ""}`);
   const states = [...new Set(rows.map(r => r.state).filter(Boolean))].sort();

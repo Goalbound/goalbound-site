@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-12T23:54:07.479184+00:00",
+ "generated_at": "2026-09-13T01:00:50.269773+00:00",
  "tables": {
   "schools": {
    "rows": 1092,
@@ -19,7 +19,7 @@
   },
   "hometowns": {
    "rows": 272583,
-   "bytes": 3659010
+   "bytes": 4685354
   },
   "stats": {
    "rows": 274728,
@@ -31,11 +31,11 @@
   },
   "under_recruited": {
    "rows": 188295,
-   "bytes": 3319308
+   "bytes": 3587529
   },
   "elite": {
    "rows": 199,
-   "bytes": 2694
+   "bytes": 2713
   }
  }
 }

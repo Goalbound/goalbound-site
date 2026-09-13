@@ -122,14 +122,14 @@ async function render() {
   keep($("conf"), confs.map(c => ({ v: c.id, t: c.name })), cf);
 
   const rows = await q(`
-    select u.player_name, u.hometown, u.state, u.lat, u.lng, u.tier, u.d1_feeder, u.gp, u.gs, u.pts, u.team_games,
+    select u.player_name, u.hometown, u.town, u.state, u.lat, u.lng, u.tier, u.d1_feeder, u.gp, u.gs, u.pts, u.team_games,
            s.display_name school, c.name conference,
            (select any_value(team) from aa where lower(aa.player_name)=lower(u.player_name) and aa.year=u.year and aa.sport_id=u.sport_id) aa_team
     from ur u join sch s on s.id=u.school_id left join conf c on c.id=u.conference_id
     where ${where}`);
   const starters = rows.filter(r => r.tier === "starter"), hot = starters.filter(r => !r.d1_feeder);
   $("hot").textContent = hot.length.toLocaleString();
-  $("hotk").textContent = `D${div} starters in ${year} from ${new Set(hot.map(r => r.hometown)).size.toLocaleString()} hometowns that put nobody on a D1 roster in the prior six seasons` + (starters.length ? ` — ${Math.round(hot.length / starters.length * 100)}% of starters` : "");
+  $("hotk").textContent = `D${div} starters in ${year} from ${new Set(hot.map(r => r.town + '|' + r.state)).size.toLocaleString()} hometowns that put nobody on a D1 roster in the prior six seasons` + (starters.length ? ` — ${Math.round(hot.length / starters.length * 100)}% of starters` : "");
   $("nStart").textContent = starters.length.toLocaleString(); $("nRost").textContent = rows.length.toLocaleString();
   $("nAA").textContent = rows.filter(r => r.aa_team).length;
 

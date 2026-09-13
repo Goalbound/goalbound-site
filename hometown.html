@@ -105,9 +105,12 @@ const q = async sql => (await conn.query(sql)).toArray().map(r => Object.fromEnt
 
 async function fillTowns(preferred) {
   const st = $("state").value;
-  const towns = await q(`select city, count(distinct player_name) n from h where state='${esc(st)}' and city is not null group by 1 order by 2 desc, 1`);
-  $("town").innerHTML = towns.map(t => `<option value="${t.city}">${t.city} (${t.n})</option>`).join("");
-  if (preferred && towns.some(t => t.city === preferred)) $("town").value = preferred;
+  // Towns are the canonical key from the export (spelling variants and named sections
+  // such as "Essex Junction" already folded into their parent); town_disp is the label.
+  const towns = await q(`select town, any_value(town_disp) disp, count(distinct player_name) n from h where state='${esc(st)}' and town is not null group by 1 order by 3 desc, 2`);
+  $("town").innerHTML = towns.map(t => `<option value="${t.town}">${t.disp} (${t.n})</option>`).join("");
+  const pref = preferred ? towns.find(t => t.disp === preferred || t.town === preferred.toLowerCase()) : null;
+  if (pref) $("town").value = pref.town;
 }
 
 // Great-circle miles from a point, as SQL. Every coordinate is wrapped in its own
@@ -130,11 +133,16 @@ function fitTo(pts) {
 }
 
 async function render() {
-  const st = $("state").value, town = $("town").value, radius = Number($("radius").value), sport = $("sport").value;
+  const st = $("state").value, townKey = $("town").value, radius = Number($("radius").value), sport = $("sport").value;
+  const town = $("town").selectedOptions[0]?.text.replace(/ \(\d+\)$/, "") || townKey;
   status("Querying…");
   const sportW = sport ? ` and h.sport_id='${sport}'` : "";
 
-  const home = (await q(`select avg(lat) la, avg(lng) lo from h where state='${esc(st)}' and city='${esc(town)}'`))[0];
+  const home = (await q(`select avg(lat) la, avg(lng) lo from h where state='${esc(st)}' and town='${esc(townKey)}'`))[0];
+  // What the canonical town folds together, and neighbours that share its first word
+  // but were NOT folded (a Hills/Heights/Park next door) — so nobody has to guess.
+  const parts = await q(`select city, count(distinct player_name) n from h where state='${esc(st)}' and town='${esc(townKey)}' group by 1 order by 2 desc`);
+  const sibs = await q(`select any_value(town_disp) disp, count(distinct player_name) n from h where state='${esc(st)}' and town<>'${esc(townKey)}' and (town like '${esc(townKey)}' || ' %' or '${esc(townKey)}' like town || ' %') group by town order by 2 desc`);
   homeLL = home && home.la != null ? [home.la, home.lo] : null;
 
   // "This town" is an exact match; a radius is great-circle from the town centre;
@@ -142,7 +150,7 @@ async function render() {
   // and a circle is closer to how anyone actually thinks about a recruiting area.
   let where;
   if (radius === -1) where = `h.state='${esc(st)}'`;
-  else if (radius === 0 || !homeLL) where = `h.state='${esc(st)}' and h.city='${esc(town)}'`;
+  else if (radius === 0 || !homeLL) where = `h.state='${esc(st)}' and h.town='${esc(townKey)}'`;
   else where = `${milesFrom(homeLL)} <= ${radius}`;
 
   const rows = await q(`
@@ -169,6 +177,8 @@ async function render() {
   $("headk").innerHTML = list.length
     ? `players from <b style="color:#f4f4f2">${scope}</b> have played college lacrosse since 2015 — at <b style="color:#f4f4f2">${schools.length}</b> different programs`
       + (radius > 0 ? `, across ${towns.size} towns` : "")
+      + (radius === 0 && parts.length > 1 ? `<br><span class="pc">Includes ${parts.map(p => `${p.city} (${p.n})`).join(", ")}</span>` : "")
+      + (radius === 0 && sibs.length ? `<br><span class="pc">Nearby but listed separately: ${sibs.map(p => `${p.disp} (${p.n})`).join(", ")}</span>` : "")
     : `No college players recorded from ${scope} since 2015.`;
 
   const d1 = schools.filter(s => s.division === 1).reduce((n, s) => n + s.players.length, 0);

@@ -111,7 +111,7 @@ async function boot() {
     select b.sport_id, b.year, b.school_id, b.player_name, b.town, b.state, b.lat, b.lng, b.tier,
            (e.school_id is not null) elite
     from (
-      select h.sport_id, h.year, h.school_id, h.player_name, lower(trim(split_part(h.hometown_str, ',', 1))) town,
+      select h.sport_id, h.year, h.school_id, h.player_name, h.town,
              h.state, h.lat, h.lng, null::varchar tier
       from ht h where h.year < 2020 and h.state is not null
       union all
