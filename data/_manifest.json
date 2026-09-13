@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-09-13T01:00:50.269773+00:00",
+ "generated_at": "2026-09-13T02:33:38.722134+00:00",
  "tables": {
   "schools": {
    "rows": 1092,
-   "bytes": 74974
+   "bytes": 74971
   },
   "conferences": {
    "rows": 139,
@@ -19,7 +19,7 @@
   },
   "hometowns": {
    "rows": 272583,
-   "bytes": 4685354
+   "bytes": 4685357
   },
   "stats": {
    "rows": 274728,
@@ -31,11 +31,11 @@
   },
   "under_recruited": {
    "rows": 188295,
-   "bytes": 3587529
+   "bytes": 3591743
   },
   "elite": {
    "rows": 199,
-   "bytes": 2713
+   "bytes": 2717
   }
  }
 }
