@@ -52,7 +52,19 @@
   nav a.n:hover { color: var(--ink); }
   nav a.cta { font: 600 13px var(--body); text-decoration: none; color: var(--ground); background: var(--ink); padding: 8px 14px; border-radius: 4px; white-space: nowrap; }
   nav a.cta:hover { background: #fff; }
-  @media (max-width: 720px) { nav .links { display: none; } }
+  /* The links used to be display:none here, which left a phone with no way to reach
+     any page except by scrolling to the doors — About was unreachable entirely.
+     They now wrap onto their own row under the logo and scroll sideways if narrow. */
+  @media (max-width: 720px) {
+    nav { flex-wrap: wrap; gap: 0 16px; }
+    nav .links {
+      order: 3; width: 100%; margin-top: 12px; padding-top: 12px;
+      border-top: 1px solid var(--line); gap: 18px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    nav .links::-webkit-scrollbar { display: none; }
+    nav a.n { white-space: nowrap; }
+  }
 
   .hero { padding: 72px 0 44px; }
   .hero .line { margin-top: 18px; font-size: 17px; color: var(--muted); max-width: 56ch; }

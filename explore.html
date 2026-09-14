@@ -14,6 +14,10 @@
   *{box-sizing:border-box} html{color-scheme:dark}
   body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--body);display:grid;grid-template-columns:360px 1fr;height:100vh}
   aside{border-right:1px solid var(--line);overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  nav.pages{display:flex;flex-wrap:wrap;gap:5px 13px;font:500 11.5px/1.6 var(--mono);padding-bottom:12px;border-bottom:1px solid var(--line)}
+  nav.pages a{color:var(--muted);text-decoration:none;white-space:nowrap}
+  nav.pages a:hover{color:var(--ink)}
+  nav.pages a[aria-current]{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
   .logo{font:700 20px/1 var(--display);letter-spacing:.04em;text-decoration:none;display:flex;align-items:center;gap:9px;color:var(--ink)}
   .logo i{width:9px;height:9px;border-radius:50%;background:var(--ink)}
   h1{font:700 24px/1 var(--display);margin:0}
@@ -43,6 +47,15 @@
 <body>
 <aside>
   <a class="logo" href="/"><i></i>GOALBOUND</a>
+  <nav class="pages">
+    <a href="/hometown.html">Your town</a>
+    <a href="/town-yield.html">Town yield</a>
+    <a href="/yield.html">My program</a>
+    <a href="/elite-footprint.html">Top-10</a>
+    <a href="/explore.html" aria-current="page">Overlooked</a>
+    <a href="/all-americans.html">All-Americans</a>
+    <a href="/about.html">About</a>
+  </nav>
   <div><div class="eyebrow">Explore</div><h1>The towns D1 overlooked</h1></div>
   <div class="row">
     <div><label class="f" for="sport">Sport</label><select id="sport"><option value="MLA">Men's</option><option value="WLA">Women's</option></select></div>
@@ -149,7 +162,17 @@ async function render() {
         `<br><span class="pc">${r.hometown ?? ""}</span>` + (r.tier === "starter" && !r.d1_feeder ? `<br><b>No D1 program has recruited from this town</b>` : "")));
   }
   layer = L.layerGroup(ms).addTo(map);
-  const pts = ms.map(m => m.getLatLng()); if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(.12));
+  // Leaflet can measure this container before the grid has laid it out and land on
+  // zoom 0 (the whole world). Re-measure, then re-fit on the next frame if it did.
+  // A handful of hometowns are geocoded to the wrong continent, so the fit is clamped
+  // to North America rather than letting one bad point pull the view out.
+  const pts = ms.map(m => m.getLatLng())
+    .filter(p => p.lat > 15 && p.lat < 72 && p.lng > -170 && p.lng < -50);
+  const fit = () => {
+    map.invalidateSize();
+    map.fitBounds(L.latLngBounds(pts).pad(.12), { animate: false });
+  };
+  if (pts.length) { fit(); requestAnimationFrame(() => { if (map.getZoom() <= 3) fit(); }); }
 
   const byState = {};
   for (const r of starters) { const k = r.state || "?"; byState[k] = byState[k] || { hot: 0, all: 0 }; byState[k].all++; if (!r.d1_feeder) byState[k].hot++; }
