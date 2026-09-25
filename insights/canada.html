@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!--
+  Goalbound Insights, article 1 (2026-09-24). DRAFT for Tom's edit.
+  Every number in the text was re-run against the Parquet export of 2026-09-14 on
+  2026-09-24, with the geocoding corrections in insights.js (GEO_FIXES) applied — so
+  Ontario reads 27.7 here, not the 27.4 in docs/GEOGRAPHY-FINDINGS.md. The two figures are live
+  queries over /data, so they follow the data; the text does not — re-check it after
+  a data refresh (queries in the README, "Insights").
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canada is the most under-recruited source in men's college lacrosse · Goalbound</title>
+<meta name="description" content="Per roster spot, Ontario produces more All-Americans than any US state, and Canadian players start more and sit less. Yet they fill one D1 roster spot in twenty.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Canada is the most under-recruited source in men's college lacrosse">
+<meta property="og:description" content="Per roster spot, Ontario produces more All-Americans than any US state. Canadians start more and sit less. They fill one D1 roster spot in twenty.">
+<meta property="og:site_name" content="Goalbound">
+
+<!-- Google Analytics 4 — property "GoalBound" (418596490), stream goalbound.co. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3V9JJ6DNLY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag("js", new Date());
+  gtag("config", "G-3V9JJ6DNLY");
+</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/insights/insights.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="/"><i></i><span>GOALBOUND<sup>&reg;</sup></span></a>
+      <span class="links">
+        <a class="n" href="/hometown.html">Recruits</a>
+        <a class="n" href="/town-yield.html">Coaches</a>
+        <a class="n" href="/insights/" aria-current="page">Insights</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound%20%E2%80%94%20PLL%2FNLL">Pro</a>
+        <a class="n" href="/about.html">About</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound">Contact</a>
+      </span>
+      <a class="cta" href="https://forms.gle/o9eEppHEdVghhQAZ8" target="_blank" rel="noopener">Book a walkthrough</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="hero">
+      <div class="eyebrow"><a href="/insights/">Insights</a> &middot; Men's lacrosse &middot; For coaches</div>
+      <h1>Canada is the most under-recruited source in men's college lacrosse.</h1>
+      <div class="byline">Tom Garvey &middot; 24 September 2026 &middot; rosters and All-Americans 2015–2026</div>
+    </section>
+
+    <article class="prose">
+      <p class="lede">Per roster spot, no state or province produces more All-Americans than Ontario. Canadian players also start more often and sit on the bench less. Yet Canadians fill only about one Division I roster spot in twenty.</p>
+
+      <h2>Counting per player, not per state</h2>
+      <p>New York has the most All-Americans of anywhere — 346 men's selections since 2015 — because it puts the most players on college rosters: 32,406 player-seasons. (A player-season is one player on one roster for one year.) Divide the first number by the second and New York produces <b>10.7 All-Americans per 1,000 player-seasons</b>. That rate is what a coach is buying with each roster spot.</p>
+      <p>Measured that way, the map changes.</p>
+
+      <figure id="fig1">
+        <h3>All-American selections per 1,000 rostered player-seasons</h3>
+        <div class="sub" id="f1sub">Home state or province of every rostered player, all divisions, 2015–2026. Places with at least 500 player-seasons.</div>
+        <div class="ctl">
+          <div class="seg" role="group" aria-label="Sport">
+            <button type="button" data-sport="MLA" aria-pressed="true">Men's</button>
+            <button type="button" data-sport="WLA" aria-pressed="false">Women's</button>
+          </div>
+          <div class="legend"><span><i style="background:var(--m1)"></i>Canadian province</span><span><i style="background:var(--m-rest)"></i>US state</span></div>
+        </div>
+        <table class="bars" id="f1"></table>
+        <div class="fig-status" id="f1status">Loading the data…</div>
+        <figcaption>Hover a row for the counts. Live query over Goalbound's roster and All-American tables.</figcaption>
+      </figure>
+
+      <p><b>Ontario produces 27.7 All-Americans per 1,000 player-seasons</b> — two and a half times New York's rate and more than twice Maryland's (12.0). British Columbia (18.8) and Alberta (18.3) come next. Every Canadian province with enough players to measure is in the top three. Only Oregon, on a small base of 738 player-seasons, comes close among US states (17.6).</p>
+      <p>At the other end are the growth markets that college programs have spent a decade recruiting: Ohio and Illinois at 4.0, Texas at 3.9.</p>
+
+      <h2>They play, too</h2>
+      <p>All-American honors reach only the top few players a year. For the rest of a roster, the better question is who gets on the field. Across Division I men's lacrosse from 2022 to 2026, 18% of rostered players were starters and 35% barely played.</p>
+      <p><b>Canadian players started 25% of the time and sat 29% of the time.</b> Ontario had the lowest bench rate of any state or province with at least 150 D1 player-seasons (27%), and British Columbia the second lowest (30%). The highest were Florida (43%), Georgia and Colorado (41% each).</p>
+
+      <figure id="fig2">
+        <h3>Who gets on the field — Division I, 2022–2026</h3>
+        <div class="sub" id="f2sub">Share of rostered player-seasons by playing time, by home state or province. Places with at least 150 D1 player-seasons, sorted by bench rate, lowest first.</div>
+        <div class="ctl">
+          <div class="seg" role="group" aria-label="Sport">
+            <button type="button" data-sport="MLA" aria-pressed="true">Men's</button>
+            <button type="button" data-sport="WLA" aria-pressed="false">Women's</button>
+          </div>
+          <div class="legend"><span><i style="background:var(--m1)"></i>Starter</span><span><i style="background:var(--m2)"></i>Rotation</span><span><i style="background:var(--m3)"></i>Bench</span></div>
+        </div>
+        <table class="bars" id="f2"></table>
+        <div class="fig-status" id="f2status">Loading the data…</div>
+        <figcaption>Starter: started at least 60% of team games. Rotation: played at least 25%. Bench: less than that, or no stats line. Seasons under 10 games left out.</figcaption>
+      </figure>
+
+      <h2>And there aren't many of them</h2>
+      <p>For all that, <b>Canadians held 5.1% of Division I men's roster spots</b> from 2015 to 2026, and 3.2% across all three divisions. The places that return the most per player get the fewest players.</p>
+
+      <h2>Why the gap might exist, and what it doesn't prove</h2>
+      <p>Recruiting in Canada costs more. The travel is longer, the best players grow up playing box lacrosse on a calendar that doesn't match the US summer showcase circuit, and few staffs have the contacts. A program that relies on the showcase circuit will see relatively few Canadian players.</p>
+      <p>There is an honest counterpoint. The Canadians who reach US rosters today were filtered hard to get there. The next Canadian a program adds won't necessarily match the average of those already there. What the data does show is that, at today's recruiting levels, the Canadian players programs do find earn more honors per player and play more minutes than players from any US state. That is a strong reason to look harder, not a guarantee.</p>
+      <p>The women's game points the same way. Toggle the first chart: Ontario leads there too, at 17.9 against New York's 15.7. The base is small, though — 893 player-seasons and 16 selections — so read it as a signal rather than a verdict.</p>
+
+      <h2>How we counted</h2>
+      <ul>
+        <li><b>All-Americans:</b> USILA First, Second and Third Teams for men (2015–2026; there were none in 2020), IWLCA for women (2015–2025).</li>
+        <li><b>Matching:</b> each selection is matched to a roster by player name, season and division, and takes that roster's hometown. Selections that don't match a roster are left out, which undercounts every state slightly.</li>
+        <li><b>Hometown:</b> as printed on the college roster, geocoded to a state or province. While checking this piece we found 478 player-seasons of US towns placed in Canada — mostly Chatham, New Jersey, filed under Ontario. They are corrected here. The correction makes Ontario's rate slightly higher, not lower.</li>
+        <li><b>Minimum size:</b> 500 player-seasons for the first chart, 150 for the second, so one great player from a small place can't top the list.</li>
+      </ul>
+    </article>
+
+    <div class="next">
+      <div class="num">NEXT</div>
+      <div>
+        <p>Oakville has produced more men's All-Americans than any other Canadian town. See where its players went to college — then change the town to your own.</p>
+        <a href="/hometown.html?country=Canada&amp;state=Ontario&amp;town=Oakville&amp;sport=MLA"><s>&rarr;</s>Where players from Oakville, Ontario went</a><br>
+        <a href="/town-yield.html"><s>&rarr;</s>Which towns' players actually play, by conference</a>
+      </div>
+    </div>
+
+    <aside class="sponsor" aria-label="Sponsor">
+      <div>
+        <div class="lbl">Sponsor</div>
+        <p>Reach the lacrosse families and coaches who read Goalbound. One sponsor per page.</p>
+      </div>
+      <a href="mailto:tom@goalbound.co?subject=Sponsoring%20Goalbound">Sponsor this page</a>
+    </aside>
+
+    <section class="signup" aria-labelledby="su">
+      <h3 id="su">Get the next insight</h3>
+      <p>One email when a new finding goes up. Nothing else.</p>
+      <form novalidate>
+        <input type="email" name="email" placeholder="you@school.edu" autocomplete="email" aria-label="Email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+      <div class="msg" aria-live="polite"></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap">
+    <span>Goalbound LLC</span>
+    <span>2015–2026 rosters · game statistics · All-Americans · Division I–III · men's and women's lacrosse</span>
+    <a href="mailto:tom@goalbound.co">tom@goalbound.co</a>
+  </div>
+  <div class="wrap tm">GOALBOUND<sup>&reg;</sup> is a registered service mark of Goalbound, LLC &middot; U.S. Reg. No. 8,068,885</div>
+</footer>
+
+<script type="module">
+import { engine, fixedTables, dataDate, tooltips, signup, fmt, esc } from "/insights/insights.js";
+const $ = id => document.getElementById(id);
+signup();
+tooltips($("f1")); tooltips($("f2"));
+
+const SPAN = { MLA: "2015–2026 (no selections in 2020)", WLA: "2015–2025" };
+let q, asOf;
+
+// Figure 1 — selections per 1,000 player-seasons by home state/province.
+// Same join as docs/GEOGRAPHY-FINDINGS.md §4: name + season + sport + division.
+async function fig1(sport) {
+  $("f1status").textContent = "Querying…";
+  $("f1sub").textContent = `Home state or province of every rostered player, all divisions, ${SPAN[sport]}. Places with at least 500 player-seasons.`;
+  const rows = await q(`
+    with b as (select h.sport_id, h.year, s.division, lower(trim(h.player_name)) k, h.state, h.country
+               from homes h join sch s on s.id = h.school_id where h.state is not null and h.sport_id = '${sport}'),
+         r as (select state, any_value(country) country, count(*) rostered from b group by 1),
+         a as (select b.state, count(*) aa from aa join b on b.year = aa.year and b.k = lower(trim(aa.player_name)) and 'D' || b.division = aa.division
+               where aa.sport_id = '${sport}' and aa.team in ('First','Second','Third') group by 1)
+    select state, country, rostered, coalesce(aa, 0) aa, 1000.0 * coalesce(aa, 0) / rostered rate
+    from r left join a using (state) where rostered >= 500 order by rate desc, state`);
+  const tot = rows.reduce((t, r) => ({ n: t.n + r.rostered, a: t.a + r.aa }), { n: 0, a: 0 });
+  const max = Math.max(...rows.map(r => r.rate));
+  const row = (r, cls = "") => `<tr class="${cls}" data-tip="<b>${esc(r.state)}</b><br>${fmt(r.aa)} selections from ${fmt(r.rostered)} player-seasons">
+      <td class="name">${esc(r.state)}${r.country === "Canada" ? `<span class="tag">CAN</span>` : ""}</td>
+      <td><div class="track"><div class="bar" style="width:${(r.rate / max * 100).toFixed(1)}%"></div></div></td>
+      <td class="v r">${r.rate.toFixed(1)}</td></tr>`;
+  $("f1").innerHTML = `<tr><th>Home</th><th></th><th class="r">Per 1,000</th></tr>`
+    + row({ state: "Every place listed", rostered: tot.n, aa: tot.a, rate: 1000 * tot.a / tot.n }, "base")
+    + rows.map(r => row(r, r.country === "Canada" ? "hl" : "")).join("");
+  $("f1status").textContent = `${rows.length} states and provinces · data as of ${asOf ?? "—"}`;
+}
+
+// Figure 2 — D1 playing-time tiers by home state/province, 2022–2026.
+async function fig2(sport) {
+  $("f2status").textContent = "Querying…";
+  const base = `from u where sport_id = '${sport}' and division = 1 and year between 2022 and 2026 and team_games >= 10 and state is not null`;
+  const agg = `count(*) n, avg((tier = 'starter')::int) s, avg((tier = 'rotation')::int) r, avg((tier = 'bench')::int) b`;
+  const [all] = await q(`select ${agg} ${base}`);
+  const [can] = await q(`select ${agg} ${base} and country_is_canada`);
+  const rows = await q(`select state, any_value(country_is_canada) ca, ${agg} ${base} group by 1 having count(*) >= 150 order by b, state`);
+  const pct = x => Math.round(x * 100);
+  const row = (name, r, cls = "", ca = false) => `<tr class="${cls}" data-tip="<b>${esc(name)}</b><br>${fmt(r.n)} player-seasons<br>Starter ${pct(r.s)}% · Rotation ${pct(r.r)}% · Bench ${pct(r.b)}%">
+      <td class="name">${esc(name)}${ca ? `<span class="tag">CAN</span>` : ""}</td>
+      <td><div class="stack"><b class="s1" style="width:${(r.s * 100).toFixed(1)}%"></b><b class="s2" style="width:${(r.r * 100).toFixed(1)}%"></b><b class="s3" style="width:${(r.b * 100).toFixed(1)}%"></b></div></td>
+      <td class="v r">${pct(r.s)} / ${pct(r.b)}</td></tr>`;
+  $("f2").innerHTML = `<tr><th>Home</th><th></th><th class="r">Start / bench %</th></tr>`
+    + row("All D1 players", all, "base")
+    + (can.n ? row("All Canadians", can, "base hl", true) : "")
+    + rows.map(r => row(r.state, r, r.ca ? "hl" : "", r.ca)).join("");
+  $("f2status").textContent = `${fmt(all.n)} D1 player-seasons · data as of ${asOf ?? "—"}`;
+}
+
+function wire(figId, draw) {
+  const btns = document.querySelectorAll(`#${figId} .seg button`);
+  btns.forEach(b => b.onclick = () => {
+    btns.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    draw(b.dataset.sport).catch(fail(figId));
+  });
+}
+const fail = figId => e => { document.querySelector(`#${figId} .fig-status`).innerHTML = `<b>Couldn't load the data.</b> ${esc(e.message)}`; };
+
+(async () => {
+  asOf = await dataDate();
+  q = await engine({ homes_raw: "hometowns", aa: "all_american", sch: "schools", ur: "under_recruited" });
+  // Corrected copies (see GEO_FIXES in insights.js), built once so the toggles are quick.
+  await fixedTables(q, { underRecruited: "ur" });
+  wire("fig1", fig1); wire("fig2", fig2);
+  await Promise.all([fig1("MLA").catch(fail("fig1")), fig2("MLA").catch(fail("fig2"))]);
+})().catch(e => { fail("fig1")(e); fail("fig2")(e); });
+</script>
+</body>
+</html>

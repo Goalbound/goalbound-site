@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!--
+  Goalbound Insights index (2026-09-24). Newest article first. Add an article by
+  copying canada.html and adding one <a class="item"> block at the top of .list.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Insights · Goalbound</title>
+<meta name="description" content="Findings from twelve seasons of college lacrosse rosters, statistics and All-Americans: where players come from, who plays, and who college programs miss.">
+<meta property="og:title" content="Goalbound Insights">
+<meta property="og:description" content="Findings from twelve seasons of college lacrosse rosters, statistics and All-Americans.">
+<meta property="og:site_name" content="Goalbound">
+
+<!-- Google Analytics 4 — property "GoalBound" (418596490), stream goalbound.co. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3V9JJ6DNLY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag("js", new Date());
+  gtag("config", "G-3V9JJ6DNLY");
+</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/insights/insights.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="/"><i></i><span>GOALBOUND<sup>&reg;</sup></span></a>
+      <span class="links">
+        <a class="n" href="/hometown.html">Recruits</a>
+        <a class="n" href="/town-yield.html">Coaches</a>
+        <a class="n" href="/insights/" aria-current="page">Insights</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound%20%E2%80%94%20PLL%2FNLL">Pro</a>
+        <a class="n" href="/about.html">About</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound">Contact</a>
+      </span>
+      <a class="cta" href="https://forms.gle/o9eEppHEdVghhQAZ8" target="_blank" rel="noopener">Book a walkthrough</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Insights</div>
+      <h1>What twelve seasons of college lacrosse data show.</h1>
+    </section>
+    <div class="prose">
+      <p class="lede">Where players come from, who gets on the field, and who college programs overlook. Each finding comes with the data behind it, and a link to check your own town or program.</p>
+    </div>
+
+    <div class="list">
+      <a class="item" href="/insights/canada.html">
+        <div class="date">24 Sep 2026</div>
+        <div>
+          <h2>Canada is the most under-recruited source in men's college lacrosse.</h2>
+          <p>Per roster spot, Ontario produces more All-Americans than any US state, and Canadian players start more and sit less. They fill one Division I roster spot in twenty.</p>
+          <div class="for">Men's &middot; For coaches</div>
+        </div>
+      </a>
+    </div>
+
+    <section class="signup" aria-labelledby="su">
+      <h3 id="su">Get the next insight</h3>
+      <p>One email when a new finding goes up. Nothing else.</p>
+      <form novalidate>
+        <input type="email" name="email" placeholder="you@school.edu" autocomplete="email" aria-label="Email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+      <div class="msg" aria-live="polite"></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap">
+    <span>Goalbound LLC</span>
+    <span>2015–2026 rosters · game statistics · All-Americans · Division I–III · men's and women's lacrosse</span>
+    <a href="mailto:tom@goalbound.co">tom@goalbound.co</a>
+  </div>
+  <div class="wrap tm">GOALBOUND<sup>&reg;</sup> is a registered service mark of Goalbound, LLC &middot; U.S. Reg. No. 8,068,885</div>
+</footer>
+
+<script type="module">
+import { signup } from "/insights/insights.js";
+signup();
+</script>
+</body>
+</html>

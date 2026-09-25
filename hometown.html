@@ -96,8 +96,14 @@ const status = t => $("status").innerHTML = t;
 const esc = s => String(s).replace(/'/g, "''");
 let conn, map, layer, meta, homeLL = null;
 
-// Seeded so the page opens on a real answer rather than an empty form.
-const SEED_COUNTRY = "United States", SEED_STATE = "Vermont", SEED_TOWN = "South Burlington";
+// Seeded so the page opens on a real answer rather than an empty form. A link can
+// pre-fill the question (?country=Canada&state=Ontario&town=Oakville&sport=MLA) —
+// Insights articles use this so "see your town" lands on the reader's case. A state
+// from the URL without a town opens on that state's biggest town.
+const URLP = new URLSearchParams(location.search);
+const SEED_COUNTRY = URLP.get("country") || "United States",
+      SEED_STATE = URLP.get("state") || (URLP.get("country") ? null : "Vermont"),
+      SEED_TOWN = URLP.get("town") || (URLP.get("state") || URLP.get("country") ? null : "South Burlington");
 
 // State names are only unique within a country ("Capital" is in both Bahrain and
 // Iceland), so every state filter carries the country with it.
@@ -120,6 +126,7 @@ async function boot() {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
   await fillStates(SEED_STATE);
   await fillTowns(SEED_TOWN);
+  if (URLP.get("sport") && [...$("sport").options].some(o => o.value === URLP.get("sport"))) $("sport").value = URLP.get("sport");
   $("country").onchange = () => fillStates().then(() => fillTowns()).then(render).catch(fail);
   $("state").onchange = () => fillTowns().then(render).catch(fail);
   ["town", "radius", "sport"].forEach(id => $(id).onchange = () => render().catch(fail));
