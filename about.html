@@ -46,6 +46,7 @@
   nav { display: flex; align-items: center; gap: 28px; padding: 16px 0; }
   .logo { font: 700 20px/1 var(--display); letter-spacing: .05em; text-decoration: none; display: flex; align-items: center; gap: 9px; margin-right: auto; }
   .logo i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); display: inline-block; }
+  .logo sup { font-size: .46em; vertical-align: super; letter-spacing: 0; }
   nav .links { display: flex; gap: 22px; }
   nav a.n { font: 500 13px var(--body); text-decoration: none; color: var(--muted); }
   nav a.n:hover, nav a.n[aria-current="page"] { color: var(--ink); }
@@ -100,13 +101,15 @@
   footer { border-top: 1px solid var(--line); padding: 16px 0 34px; font: 400 12px/1.5 var(--mono); color: var(--dim); }
   footer a { text-decoration: none; }
   footer a:hover { color: var(--ink); }
+  footer .tm { margin-top: 10px; font-size: 11px; opacity: .85; }
+  footer .tm sup { font-size: .72em; vertical-align: super; }
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
     <nav>
-      <a class="logo" href="/"><i></i>GOALBOUND</a>
+      <a class="logo" href="/"><i></i><span>GOALBOUND<sup>&reg;</sup></span></a>
       <span class="links">
         <a class="n" href="/hometown.html">Recruits</a>
         <a class="n" href="/town-yield.html">Coaches</a>
@@ -132,6 +135,8 @@
       <p>In 2013, Tom Garvey began blogging about lacrosse through an analytic lens under the title of <b>Laxparent</b>. Those early blog posts were a largely manual effort of capturing college rosters, aggregating them in spreadsheets and looking for trends a complete dataset made visible.</p>
 
       <p>Goalbound is the next iteration with the more audacious goal of creating a scalable, repeatable process and product through a modern tech stack. I'm thankful for the contributions of more than twenty people who have worked on the web application.</p>
+
+      <p>In December 2025 the U.S. Patent and Trademark Office registered <b>GOALBOUND<sup>&reg;</sup></b> as a service mark for college athletics recruiting information services.</p>
 
       <p>My current vision for Goalbound is threefold:</p>
     </div>
@@ -174,6 +179,7 @@
     <span>2015–2026 rosters · game statistics · All-Americans · Division I–III · men's and women's</span>
     <a href="mailto:tom@goalbound.co">tom@goalbound.co</a>
   </div>
+  <div class="wrap tm">GOALBOUND<sup>&reg;</sup> is a registered service mark of Goalbound, LLC &middot; U.S. Reg. No. 8,068,885</div>
 </footer>
 </body>
 </html>
