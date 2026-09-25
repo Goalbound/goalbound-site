@@ -59,14 +59,17 @@
   <div><div class="eyebrow">For players and families</div><h1>Where do players from your town end up?</h1></div>
 
   <div class="row">
-    <div><label class="f" for="state">State</label><select id="state"></select></div>
-    <div><label class="f" for="town">Town</label><select id="town"></select></div>
+    <div><label class="f" for="country">Country</label><select id="country"></select></div>
+    <div><label class="f" for="state" id="stateLbl">State</label><select id="state"></select></div>
   </div>
   <div class="row">
+    <div><label class="f" for="town">Town</label><select id="town"></select></div>
     <div><label class="f" for="radius">Include</label><select id="radius">
       <option value="0">This town only</option><option value="25">Within 25 miles</option>
       <option value="50">Within 50 miles</option><option value="100">Within 100 miles</option>
-      <option value="-1">The whole state</option></select></div>
+      <option value="-1" id="wholeOpt">The whole state</option></select></div>
+  </div>
+  <div class="row">
     <div><label class="f" for="sport">Sport</label><select id="sport">
       <option value="">Both</option><option value="MLA">Men's</option><option value="WLA">Women's</option></select></div>
   </div>
@@ -93,7 +96,12 @@ const esc = s => String(s).replace(/'/g, "''");
 let conn, map, layer, meta, homeLL = null;
 
 // Seeded so the page opens on a real answer rather than an empty form.
-const SEED_STATE = "Vermont", SEED_TOWN = "South Burlington";
+const SEED_COUNTRY = "United States", SEED_STATE = "Vermont", SEED_TOWN = "South Burlington";
+
+// State names are only unique within a country ("Capital" is in both Bahrain and
+// Iceland), so every state filter carries the country with it.
+const inRegion = (p = "") => `${p}country='${esc($("country").value)}' and ${p}state='${esc($("state").value)}'`;
+const REGION = { "United States": "State", Canada: "Province" };
 
 async function boot() {
   const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
@@ -105,22 +113,32 @@ async function boot() {
   await conn.query(`create view sch as select * from read_parquet('${DATA}/schools.parquet')`);
   try { meta = await (await fetch(`${DATA}/_manifest.json`)).json(); } catch { meta = null; }
 
-  const states = await q(`select state, count(distinct player_name) n from h where state is not null group by 1 order by 1`);
-  $("state").innerHTML = states.map(s => `<option value="${s.state}"${s.state === SEED_STATE ? " selected" : ""}>${s.state} (${s.n.toLocaleString()})</option>`).join("");
+  const countries = await q(`select country, count(distinct player_name) n from h where country is not null group by 1 order by 2 desc, 1`);
+  $("country").innerHTML = countries.map(c => `<option value="${c.country}"${c.country === SEED_COUNTRY ? " selected" : ""}>${c.country} (${c.n.toLocaleString()})</option>`).join("");
   map = L.map("map", { scrollWheelZoom: true }).setView([44.45, -73.2], 7);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
+  await fillStates(SEED_STATE);
   await fillTowns(SEED_TOWN);
+  $("country").onchange = () => fillStates().then(() => fillTowns()).then(render).catch(fail);
   $("state").onchange = () => fillTowns().then(render).catch(fail);
   ["town", "radius", "sport"].forEach(id => $(id).onchange = () => render().catch(fail));
   await render();
 }
 const q = async sql => (await conn.query(sql)).toArray().map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, typeof v === "bigint" ? Number(v) : v])));
 
+async function fillStates(preferred) {
+  const c = $("country").value;
+  const word = REGION[c] || "Region";
+  $("stateLbl").textContent = word;
+  $("wholeOpt").textContent = `The whole ${word.toLowerCase()}`;
+  const states = await q(`select state, count(distinct player_name) n from h where country='${esc(c)}' and state is not null group by 1 order by 1`);
+  $("state").innerHTML = states.map(s => `<option value="${s.state}"${s.state === preferred ? " selected" : ""}>${s.state} (${s.n.toLocaleString()})</option>`).join("");
+}
+
 async function fillTowns(preferred) {
-  const st = $("state").value;
   // Towns are the canonical key from the export (spelling variants and named sections
   // such as "Essex Junction" already folded into their parent); town_disp is the label.
-  const towns = await q(`select town, any_value(town_disp) disp, count(distinct player_name) n from h where state='${esc(st)}' and town is not null group by 1 order by 3 desc, 2`);
+  const towns = await q(`select town, any_value(town_disp) disp, count(distinct player_name) n from h where ${inRegion()} and town is not null group by 1 order by 3 desc, 2`);
   $("town").innerHTML = towns.map(t => `<option value="${t.town}">${t.disp} (${t.n})</option>`).join("");
   const pref = preferred ? towns.find(t => t.disp === preferred || t.town === preferred.toLowerCase()) : null;
   if (pref) $("town").value = pref.town;
@@ -146,24 +164,24 @@ function fitTo(pts) {
 }
 
 async function render() {
-  const st = $("state").value, townKey = $("town").value, radius = Number($("radius").value), sport = $("sport").value;
+  const country = $("country").value, st = $("state").value + (country === "United States" ? "" : `, ${country}`), townKey = $("town").value, radius = Number($("radius").value), sport = $("sport").value;
   const town = $("town").selectedOptions[0]?.text.replace(/ \(\d+\)$/, "") || townKey;
   status("Querying…");
   const sportW = sport ? ` and h.sport_id='${sport}'` : "";
 
-  const home = (await q(`select avg(lat) la, avg(lng) lo from h where state='${esc(st)}' and town='${esc(townKey)}'`))[0];
+  const home = (await q(`select avg(lat) la, avg(lng) lo from h where ${inRegion()} and town='${esc(townKey)}'`))[0];
   // What the canonical town folds together, and neighbours that share its first word
   // but were NOT folded (a Hills/Heights/Park next door) — so nobody has to guess.
-  const parts = await q(`select city, count(distinct player_name) n from h where state='${esc(st)}' and town='${esc(townKey)}' group by 1 order by 2 desc`);
-  const sibs = await q(`select any_value(town_disp) disp, count(distinct player_name) n from h where state='${esc(st)}' and town<>'${esc(townKey)}' and (town like '${esc(townKey)}' || ' %' or '${esc(townKey)}' like town || ' %') group by town order by 2 desc`);
+  const parts = await q(`select city, count(distinct player_name) n from h where ${inRegion()} and town='${esc(townKey)}' group by 1 order by 2 desc`);
+  const sibs = await q(`select any_value(town_disp) disp, count(distinct player_name) n from h where ${inRegion()} and town<>'${esc(townKey)}' and (town like '${esc(townKey)}' || ' %' or '${esc(townKey)}' like town || ' %') group by town order by 2 desc`);
   homeLL = home && home.la != null ? [home.la, home.lo] : null;
 
   // "This town" is an exact match; a radius is great-circle from the town centre;
   // -1 is the whole state. Radius beats county here — the data has no county field,
   // and a circle is closer to how anyone actually thinks about a recruiting area.
   let where;
-  if (radius === -1) where = `h.state='${esc(st)}'`;
-  else if (radius === 0 || !homeLL) where = `h.state='${esc(st)}' and h.town='${esc(townKey)}'`;
+  if (radius === -1) where = inRegion("h.");
+  else if (radius === 0 || !homeLL) where = `${inRegion("h.")} and h.town='${esc(townKey)}'`;
   else where = `${milesFrom(homeLL)} <= ${radius}`;
 
   const rows = await q(`
