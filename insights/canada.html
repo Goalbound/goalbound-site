@@ -3,9 +3,9 @@
 <head>
 <!--
   Goalbound Insights, article 1 (2026-09-24). DRAFT for Tom's edit.
-  Every number in the text was re-run against the Parquet export of 2026-09-14 on
-  2026-09-24, with the geocoding corrections in insights.js (GEO_FIXES) applied — so
-  Ontario reads 27.7 here, not the 27.4 in docs/GEOGRAPHY-FINDINGS.md. The two figures are live
+  Every number in the text was re-run on 2026-09-24 against the export of that day,
+  the first with the geocoding fix (publish/export.py, fix_geocodes) — so Ontario
+  reads 28.4 here, not the 27.4 in docs/GEOGRAPHY-FINDINGS.md. The two figures are live
   queries over /data, so they follow the data; the text does not — re-check it after
   a data refresh (queries in the README, "Insights").
 -->
@@ -61,7 +61,7 @@
       <p class="lede">Per roster spot, no state or province produces more All-Americans than Ontario. Canadian players also start more often and sit on the bench less. Yet Canadians fill only about one Division I roster spot in twenty.</p>
 
       <h2>Counting per player, not per state</h2>
-      <p>New York has the most All-Americans of anywhere — 346 men's selections since 2015 — because it puts the most players on college rosters: 32,406 player-seasons. (A player-season is one player on one roster for one year.) Divide the first number by the second and New York produces <b>10.7 All-Americans per 1,000 player-seasons</b>. That rate is what a coach is buying with each roster spot.</p>
+      <p>New York has the most All-Americans of anywhere — 348 men's selections since 2015 — because it puts the most players on college rosters: 32,497 player-seasons. (A player-season is one player on one roster for one year.) Divide the first number by the second and New York produces <b>10.7 All-Americans per 1,000 player-seasons</b>. That rate is what a coach is buying with each roster spot.</p>
       <p>Measured that way, the map changes.</p>
 
       <figure id="fig1">
@@ -79,12 +79,12 @@
         <figcaption>Hover a row for the counts. Live query over Goalbound's roster and All-American tables.</figcaption>
       </figure>
 
-      <p><b>Ontario produces 27.7 All-Americans per 1,000 player-seasons</b> — two and a half times New York's rate and more than twice Maryland's (12.0). British Columbia (18.8) and Alberta (18.3) come next. Every Canadian province with enough players to measure is in the top three. Only Oregon, on a small base of 738 player-seasons, comes close among US states (17.6).</p>
-      <p>At the other end are the growth markets that college programs have spent a decade recruiting: Ohio and Illinois at 4.0, Texas at 3.9.</p>
+      <p><b>Ontario produces 28.4 All-Americans per 1,000 player-seasons</b> — more than two and a half times New York's rate and more than twice Maryland's (12.0). British Columbia (18.8) and Alberta (18.3) come next. Every Canadian province with enough players to measure is in the top three. Only Oregon, on a small base of 738 player-seasons, comes close among US states (17.6).</p>
+      <p>At the other end are the growth markets that college programs have spent a decade recruiting: Ohio at 4.1, Illinois at 4.0, Texas at 3.9.</p>
 
       <h2>They play, too</h2>
       <p>All-American honors reach only the top few players a year. For the rest of a roster, the better question is who gets on the field. Across Division I men's lacrosse from 2022 to 2026, 18% of rostered players were starters and 35% barely played.</p>
-      <p><b>Canadian players started 25% of the time and sat 29% of the time.</b> Ontario had the lowest bench rate of any state or province with at least 150 D1 player-seasons (27%), and British Columbia the second lowest (30%). The highest were Florida (43%), Georgia and Colorado (41% each).</p>
+      <p><b>Canadian players started 25% of the time and sat 28% of the time.</b> Ontario had the lowest bench rate of any state or province with at least 150 D1 player-seasons (27%), and British Columbia the second lowest (30%). The highest were Florida (43%), Georgia and Colorado (41% each).</p>
 
       <figure id="fig2">
         <h3>Who gets on the field — Division I, 2022–2026</h3>
@@ -102,18 +102,18 @@
       </figure>
 
       <h2>And there aren't many of them</h2>
-      <p>For all that, <b>Canadians held 5.1% of Division I men's roster spots</b> from 2015 to 2026, and 3.2% across all three divisions. The places that return the most per player get the fewest players.</p>
+      <p>For all that, <b>Canadians held 5.3% of Division I men's roster spots</b> from 2015 to 2026, and 3.2% across all three divisions. The places that return the most per player get the fewest players.</p>
 
       <h2>Why the gap might exist, and what it doesn't prove</h2>
       <p>Recruiting in Canada costs more. The travel is longer, the best players grow up playing box lacrosse on a calendar that doesn't match the US summer showcase circuit, and few staffs have the contacts. A program that relies on the showcase circuit will see relatively few Canadian players.</p>
       <p>There is an honest counterpoint. The Canadians who reach US rosters today were filtered hard to get there. The next Canadian a program adds won't necessarily match the average of those already there. What the data does show is that, at today's recruiting levels, the Canadian players programs do find earn more honors per player and play more minutes than players from any US state. That is a strong reason to look harder, not a guarantee.</p>
-      <p>The women's game points the same way. Toggle the first chart: Ontario leads there too, at 17.9 against New York's 15.7. The base is small, though — 893 player-seasons and 16 selections — so read it as a signal rather than a verdict.</p>
+      <p>The women's game points the same way. Toggle the first chart: Ontario leads there too, at 21.5 against New York's 15.7. The base is small, though — 977 player-seasons and 21 selections — so read it as a signal rather than a verdict.</p>
 
       <h2>How we counted</h2>
       <ul>
         <li><b>All-Americans:</b> USILA First, Second and Third Teams for men (2015–2026; there were none in 2020), IWLCA for women (2015–2025).</li>
         <li><b>Matching:</b> each selection is matched to a roster by player name, season and division, and takes that roster's hometown. Selections that don't match a roster are left out, which undercounts every state slightly.</li>
-        <li><b>Hometown:</b> as printed on the college roster, geocoded to a state or province. While checking this piece we found 478 player-seasons of US towns placed in Canada — mostly Chatham, New Jersey, filed under Ontario. They are corrected here. The correction makes Ontario's rate slightly higher, not lower.</li>
+        <li><b>Hometown:</b> as printed on the college roster, geocoded to a state or province. While checking this piece we found about 1,250 player-seasons the geocoder had put in the wrong state or country — Chatham, New Jersey in Ontario, Whitby, Ontario in England, Rocky Point, New York in Mexico — and fixed them at the source. The fix raised Ontario's rate; it did not create it.</li>
         <li><b>Minimum size:</b> 500 player-seasons for the first chart, 150 for the second, so one great player from a small place can't top the list.</li>
       </ul>
     </article>
@@ -157,7 +157,7 @@
 </footer>
 
 <script type="module">
-import { engine, fixedTables, dataDate, tooltips, signup, fmt, esc } from "/insights/insights.js";
+import { engine, baseTables, dataDate, tooltips, signup, fmt, esc } from "/insights/insights.js";
 const $ = id => document.getElementById(id);
 signup();
 tooltips($("f1")); tooltips($("f2"));
@@ -222,8 +222,8 @@ const fail = figId => e => { document.querySelector(`#${figId} .fig-status`).inn
 (async () => {
   asOf = await dataDate();
   q = await engine({ homes_raw: "hometowns", aa: "all_american", sch: "schools", ur: "under_recruited" });
-  // Corrected copies (see GEO_FIXES in insights.js), built once so the toggles are quick.
-  await fixedTables(q, { underRecruited: "ur" });
+  // Built once as tables so the toggles are quick.
+  await baseTables(q, { underRecruited: "ur" });
   wire("fig1", fig1); wire("fig2", fig2);
   await Promise.all([fig1("MLA").catch(fail("fig1")), fig2("MLA").catch(fail("fig2"))]);
 })().catch(e => { fail("fig1")(e); fail("fig2")(e); });

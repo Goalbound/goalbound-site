@@ -73,28 +73,14 @@ export function tooltips(root) {
 export const fmt = n => Number(n).toLocaleString("en-US");
 export const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-// ---- Known geocoding errors ---------------------------------------------------------
-// Hometown strings the pipeline geocoded to the wrong country, found 2026-09-24 while
-// checking the Canada article: 478 player-season rows of US towns labelled Canadian,
-// 409 of them Chatham, New Jersey placed in Ontario. The real fix belongs in the
-// pipeline's geocoder (and then the explorer pages pick it up); until then, article
-// figures route their data through fixedTables() so they don't repeat the error.
-// Remove an entry here once the export gets it right.
-export const GEO_FIXES = [
-  ["chatham, new jersey", "New Jersey"], ["westlake, ohio", "Ohio"],
-  ["milton, de", "Delaware"], ["milton, delaware", "Delaware"], ["glengary, w.va", "West Virginia"],
-  ["vista, ca", "California"], ["whitewood, s.d", "South Dakota"],
-];
-const FIXES = `(values ${GEO_FIXES.map(([h, s]) => `('${h}', '${s}')`).join(", ")}) f(hs, st)`;
-
-// Builds corrected tables `homes` (from a hometowns view) and, if given, `u` (from an
-// under_recruited view, with a country_is_canada flag — that export has no country).
-export async function fixedTables(q, { hometowns = "homes_raw", underRecruited } = {}) {
-  await q(`create or replace table homes as
-    select h.* replace (coalesce(f.st, h.state) as state, case when f.st is null then h.country else 'United States' end as country)
-    from ${hometowns} h left join ${FIXES} on f.hs = lower(h.hometown_str)`);
+// ---- Shared tables -------------------------------------------------------------------
+// `homes` from the hometowns export, and optionally `u` from under_recruited with a
+// country_is_canada flag (that export has no country column). Until 2026-09-24 this
+// also patched US towns the geocoder had put in Canada (Chatham, NJ in Ontario and
+// others); the export now fixes those at source (publish/export.py, fix_geocodes).
+export async function baseTables(q, { hometowns = "homes_raw", underRecruited } = {}) {
+  await q(`create or replace table homes as select * from ${hometowns}`);
   if (underRecruited) await q(`create or replace table u as
-    select ur.* replace (coalesce(f.st, ur.state) as state),
-           coalesce(coalesce(f.st, ur.state) in (select distinct state from homes where country = 'Canada'), false) country_is_canada
-    from ${underRecruited} ur left join ${FIXES} on f.hs = lower(ur.hometown)`);
+    select ur.*, coalesce(ur.state in (select distinct state from homes where country = 'Canada'), false) country_is_canada
+    from ${underRecruited} ur`);
 }
