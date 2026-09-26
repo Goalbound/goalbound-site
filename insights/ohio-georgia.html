@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!--
+  Goalbound Insights, article 3 (2026-09-25). DRAFT for Tom's edit.
+  Numbers from goalbound/scratchpad/geo-questions/{elite_blind,elite_neighbours,elite_blind3,
+  elite_blind4}.py (elite_neighbours supersedes elite_blind2, whose ties were arbitrary) against the corrected export of 2026-09-25. All tests are two-sided
+  and corrected for the number of groups tested. Both figures are live; Figure 2 runs
+  its chance test in the browser with a fixed seed so every reader sees the same result.
+  The All-American comparison in the text is not live — re-run elite_blind4.py after
+  a data refresh.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The top 10 skip Ohio and Georgia. Their players hold their own · Goalbound</title>
+<meta name="description" content="The ten best women's programs take a third as many players from Ohio and Georgia as the rest of Division I. The players who come from there play as much as their own teammates.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The top 10 skip Ohio and Georgia. Their players hold their own.">
+<meta property="og:description" content="The best women's programs rarely recruit Ohio and Georgia — even compared with their neighbours. The players who come from there play as much as their teammates.">
+<meta property="og:site_name" content="Goalbound">
+
+<!-- Google Analytics 4 — property "GoalBound" (418596490), stream goalbound.co. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3V9JJ6DNLY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag("js", new Date());
+  gtag("config", "G-3V9JJ6DNLY");
+</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/insights/insights.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="/"><i></i><span>GOALBOUND<sup>&reg;</sup></span></a>
+      <span class="links">
+        <a class="n" href="/hometown.html">Recruits</a>
+        <a class="n" href="/town-yield.html">Coaches</a>
+        <a class="n" href="/insights/" aria-current="page">Insights</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound%20%E2%80%94%20PLL%2FNLL">Pro</a>
+        <a class="n" href="/about.html">About</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound">Contact</a>
+      </span>
+      <a class="cta" href="https://forms.gle/o9eEppHEdVghhQAZ8" target="_blank" rel="noopener">Book a walkthrough</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="hero">
+      <div class="eyebrow"><a href="/insights/">Insights</a> &middot; Women's lacrosse &middot; For coaches</div>
+      <h1>The top 10 skip Ohio and Georgia. Their players hold their own.</h1>
+      <div class="byline">Tom Garvey &middot; 25 September 2026 &middot; Division I rosters, statistics and All-Americans 2015–2026</div>
+    </section>
+
+    <article class="prose">
+      <p class="lede">The ten best women's programs take a third as many players from Ohio and Georgia as the rest of Division I, and half as many as the programs next door to them. The players who do come out of those states play as much as their own teammates. For every program outside the top 10, that is the same quality with less competition.</p>
+
+      <h2>The gap</h2>
+      <p>Each season we take the ten Division I programs with the most All-Americans as the top 10: North Carolina, Maryland, Florida, Loyola, Boston College, Syracuse and Northwestern most often. Since 2015, <b>0.7% of their players have come from Ohio and 0.9% from Georgia</b>. Across the rest of Division I the figures are 2.3% and 2.6%.</p>
+      <p>Some of that is geography: the top 10 sit mostly on the East Coast. So we compared each top-10 program with the three non-top-10 programs nearest to it, which recruit from the same map. Those neighbours took 1.7% of their players from Ohio and 2.0% from Georgia — still more than twice the top 10's share.</p>
+
+      <figure id="fig1">
+        <h3>Share of roster from Ohio and Georgia, women's Division I</h3>
+        <div class="sub">Top-10 program-seasons, 2015–2026 (2020–21 excluded), against their three nearest non-top-10 programs that season and the rest of Division I.</div>
+        <div class="ctl"><div class="legend"><span><i style="background:var(--m1)"></i>Top 10</span><span><i style="background:var(--m-rest)"></i>Comparison</span></div></div>
+        <table class="bars" id="f1"></table>
+        <div class="fig-status" id="f1status">Loading the data…</div>
+        <figcaption>Hover a row for the counts. Program-seasons with at least 15 rostered players. Live query over Goalbound's roster, school and top-10 tables.</figcaption>
+      </figure>
+
+      <p>North Carolina, in the top 10 for nine seasons, took no one from either state; its nearest neighbours took 3.0%. Maryland, also nine seasons: none, against 2.2%. Florida, next door to Georgia, took 4.3% against its neighbours' 12.1%. Northwestern: 0.5% against 6.1%. Draw any ten programs a season at random and compare them with their own neighbours in the same way, and the gap averages zero. In 2,000 random draws, one as large as the top 10's came up six times.</p>
+
+      <h2>Measured against their teammates</h2>
+      <p>A gap is only an opportunity if the players are good. Comparing states on raw playing time is misleading, though: a player at a weaker program starts more easily. So we compare every player with <b>her own teammates in the same season</b>. If a state's players start more often than the women they share a locker room with, that is not about which programs they landed at.</p>
+
+      <figure id="fig2">
+        <h3>How often players start compared with their own teammates</h3>
+        <div class="sub">Percentage points above or below teammates' starting rate, women's Division I, 2022–2026. Home states and provinces with at least 150 player-seasons.</div>
+        <div class="ctl"><div class="legend"><span><i style="background:var(--m1)"></i>Beyond chance &#10003;</span><span><i style="background:var(--m-rest)"></i>Within what luck produces</span></div></div>
+        <table class="bars" id="f2"></table>
+        <div class="fig-status" id="f2status">Loading the data…</div>
+        <figcaption>"Beyond chance" means a random draw of the same number of D1 players rarely does as well or as badly: less than 5% of the time after allowing for every state tested, in either direction. The chance test runs in your browser.</figcaption>
+      </figure>
+
+      <p><b>Ohio's players start 0.8 points more often than their teammates, and Georgia's 3.0 points more.</b> Neither is beyond chance, and neither is a warning sign. By the one measure that controls for where they play, they are ordinary Division I players — as good as the women around them.</p>
+      <p>Whether the top 10 are missing stars is a different question, and the data cannot answer it. Ohio and Georgia have produced two All-Americans each since 2015. Their teammates' rate would predict 2.4 for Ohio and 4.7 for Georgia. Numbers that small say nothing either way. The only way to find out whether Ohio produces top-10 players is for a top-10 program to recruit there.</p>
+
+      <h2>What does stand out</h2>
+      <p>Two states separate from their teammates by more than luck explains. <b>New York's players become All-Americans 38% more often than their teammates</b> — 173 selections where their teammates' rate predicts 125 — and they sit on the bench less. The top programs' appetite for New York is not a habit; it is paying off.</p>
+      <p><b>Illinois players start 11 points less often than their teammates.</b> Texas and Michigan look similar, at about 9 points below, but with fewer players that could still be luck.</p>
+
+      <h2>What to do with it</h2>
+      <p><b>Programs outside the top 10:</b> Ohio and Georgia offer players who hold their own, in a market the top 10 barely enter. That is the same quality with less competition for it.</p>
+      <p><b>The top 10:</b> the gap is a habit the data can neither justify nor condemn. A few visits would settle it cheaply.</p>
+
+      <h2>How we counted</h2>
+      <ul>
+        <li><b>Top 10:</b> the ten Division I programs with the most All-American selections each season, win percentage breaking ties; 2020 and 2021 left out (COVID).</li>
+        <li><b>Neighbours:</b> the three nearest Division I programs that were not top 10 that season, by distance between their cities; programs in the same city tie, and all tied programs count.</li>
+        <li><b>Against teammates:</b> for each player-season, her teammates' starting rate that season (excluding her); a state's figure is its players' starts minus that expectation, per season. Starter means started at least 60% of the team's games. Seasons under 10 games left out.</li>
+        <li><b>All-Americans:</b> IWLCA First, Second and Third Teams, 2015–2025, matched to rosters by name, season and division, and compared with the rate of the player's own teammates.</li>
+        <li><b>Chance:</b> each state against thousands of random draws of the same number of players. A result counts only if it holds in either direction after allowing for all the states tested.</li>
+      </ul>
+    </article>
+
+    <div class="next">
+      <div class="num">NEXT</div>
+      <div>
+        <p>Cincinnati and Columbus send more women to Division I than anywhere else in Ohio. See where they went.</p>
+        <a href="/hometown.html?country=United%20States&amp;state=Ohio&amp;town=Cincinnati&amp;sport=WLA"><s>&rarr;</s>Where players from Cincinnati went</a><br>
+        <a href="/hometown.html?country=United%20States&amp;state=Ohio&amp;town=Columbus&amp;sport=WLA"><s>&rarr;</s>Where players from Columbus went</a><br>
+        <a href="/insights/town-records.html"><s>&rarr;</s>Why we judge regions, not towns</a>
+      </div>
+    </div>
+
+    <aside class="sponsor" aria-label="Sponsor">
+      <div>
+        <div class="lbl">Sponsor</div>
+        <p>Reach the lacrosse families and coaches who read Goalbound. One sponsor per page.</p>
+      </div>
+      <a href="mailto:tom@goalbound.co?subject=Sponsoring%20Goalbound">Sponsor this page</a>
+    </aside>
+
+    <section class="signup" aria-labelledby="su">
+      <h3 id="su">Get the next insight</h3>
+      <p>One email when a new finding goes up. Nothing else.</p>
+      <form novalidate>
+        <input type="email" name="email" placeholder="you@school.edu" autocomplete="email" aria-label="Email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+      <div class="msg" aria-live="polite"></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap">
+    <span>Goalbound LLC</span>
+    <span>2015–2026 rosters · game statistics · All-Americans · Division I–III · men's and women's lacrosse</span>
+    <a href="mailto:tom@goalbound.co">tom@goalbound.co</a>
+  </div>
+  <div class="wrap tm">GOALBOUND<sup>&reg;</sup> is a registered service mark of Goalbound, LLC &middot; U.S. Reg. No. 8,068,885</div>
+</footer>
+
+<script type="module">
+import { engine, dataDate, tooltips, signup, fmt, esc } from "/insights/insights.js";
+const $ = id => document.getElementById(id);
+signup();
+tooltips($("fig1")); tooltips($("fig2"));
+
+// ---- Figure 1: top 10 vs their nearest neighbours vs the rest ------------------------------
+async function fig1(q, asOf) {
+  const rows = await q(`
+    with ros as (select h.year, h.school_id, h.state from homes h join sch s on s.id = h.school_id
+                 where h.sport_id = 'WLA' and s.division = 1 and h.state is not null
+                   and h.year in (select year from el where sport_id = 'WLA')),
+    prog as (select r.year, r.school_id, any_value(s.lat) lat, any_value(s.lon) lon, count(*)::int n,
+                    sum((r.state = 'Ohio')::int)::int oh, sum((r.state = 'Georgia')::int)::int ga
+             from ros r join sch s on s.id = r.school_id where s.lat is not null group by 1, 2 having count(*) >= 15),
+    lab as (select p.*, exists (select 1 from el e where e.sport_id = 'WLA' and e.year = p.year and e.school_id = p.school_id) elite from prog p),
+    nb as (select e.year, e.school_id eid, o.n, o.oh, o.ga,
+             -- rank(), not row_number(): schools in one city share city-centre coordinates,
+             -- so every program tied at the third-nearest distance counts as a neighbour.
+             rank() over (partition by e.year, e.school_id order by
+               asin(sqrt(pow(sin(radians(o.lat - e.lat) / 2), 2) + cos(radians(e.lat)) * cos(radians(o.lat)) * pow(sin(radians(o.lon - e.lon) / 2), 2)))) rk
+           from lab e join lab o on o.year = e.year and not o.elite where e.elite)
+    select 'Top 10' grp, 0 ord, sum(n)::int n, sum(oh)::int oh, sum(ga)::int ga from lab where elite
+    union all select 'Their three nearest neighbours', 1, sum(n)::int, sum(oh)::int, sum(ga)::int from nb where rk <= 3
+    union all select 'Rest of Division I', 2, sum(n)::int, sum(oh)::int, sum(ga)::int from lab where not elite
+    order by ord`);
+  const max = Math.max(...rows.flatMap(r => [r.oh / r.n, r.ga / r.n]));
+  const row = (label, state, x, n, top) => `<tr class="${top ? "hl" : ""}" data-tip="<b>${esc(label)}</b><br>${fmt(x)} ${state} players of ${fmt(n)} player-seasons">
+      <td class="name">${esc(label)}</td>
+      <td><div class="track"><div class="bar" style="width:${(x / n / max * 100).toFixed(1)}%"></div></div></td>
+      <td class="v r">${(100 * x / n).toFixed(1)}%</td></tr>`;
+  let html = "";
+  for (const [key, state] of [["oh", "Ohio"], ["ga", "Georgia"]]) {
+    html += `<tr><th colspan="3" style="padding-top:${key === "ga" ? 14 : 0}px">${state}</th></tr>`;
+    html += rows.map(r => row(r.grp, state, r[key], r.n, r.ord === 0)).join("");
+  }
+  $("f1").innerHTML = html;
+  $("f1status").textContent = `${fmt(rows[0].n)} top-10 player-seasons · data as of ${asOf ?? "—"}`;
+}
+
+// ---- Figure 2: starts against teammates, with an in-browser chance test ------------------
+// Seeded so every reader sees the same verdicts (mulberry32).
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+async function fig2(q, asOf) {
+  const rows = await q(`
+    with w as (select * from ur where sport_id = 'WLA' and division = 1 and year between 2022 and 2026 and team_games >= 10 and state is not null),
+    t as (select year, school_id, count(*)::int n, sum((tier = 'starter')::int)::int s from w group by 1, 2)
+    select w.state, count(*)::int ps, sum((w.tier = 'starter')::int)::int st,
+           sum((t.s - (w.tier = 'starter')::int)::double / (t.n - 1)) ex
+    from w join t using (year, school_id) where t.n > 1
+    group by w.state, lower(w.player_name) || '|' || w.school_id`);
+  const players = rows.map(r => ({ ps: r.ps, d: r.st - r.ex }));
+  const groups = new Map();
+  rows.forEach((r, i) => { if (!groups.has(r.state)) groups.set(r.state, []); groups.get(r.state).push(players[i]); });
+  const excess = ps => ps.reduce((a, p) => a + p.d, 0) / ps.reduce((a, p) => a + p.ps, 0);
+  const kept = [...groups].filter(([, ps]) => ps.reduce((a, p) => a + p.ps, 0) >= 150);
+  const G = kept.length, DRAWS = 4000, rand = rng(2026);
+  const out = kept.map(([state, ps]) => {
+    const obs = excess(ps), k = ps.length; let ge = 0, le = 0;
+    for (let i = 0; i < DRAWS; i++) {
+      let d = 0, n = 0;
+      for (let j = 0; j < k; j++) { const p = players[Math.floor(rand() * players.length)]; d += p.d; n += p.ps; }
+      const x = d / n; if (x >= obs) ge++; if (x <= obs) le++;
+    }
+    const p2 = Math.min(1, 2 * Math.min(ge, le) / DRAWS);
+    return { state, obs, k, n: ps.reduce((a, p) => a + p.ps, 0), p2, sig: p2 < 0.05 / G };
+  }).sort((a, b) => b.obs - a.obs);
+  const max = Math.max(...out.map(r => Math.abs(r.obs)));
+  $("f2").innerHTML = `<tr><th>Home</th><th></th><th class="r">Points</th></tr>` + out.map(r => {
+    const w = (Math.abs(r.obs) / max * 50).toFixed(1), subj = r.state === "Ohio" || r.state === "Georgia";
+    return `<tr class="${subj ? "hl" : ""}" data-tip="<b>${esc(r.state)}</b><br>${fmt(r.k)} players, ${fmt(r.n)} player-seasons<br>Starts ${r.obs >= 0 ? "+" : ""}${(100 * r.obs).toFixed(1)} pts vs teammates<br>${r.sig ? "Beyond chance" : "Within what luck produces"}">
+      <td class="name">${esc(r.state)}${r.sig ? `<span class="mark">&#10003;</span>` : ""}</td>
+      <td><div class="dtrack"><div class="dbar ${r.obs >= 0 ? "pos" : "neg"}${r.sig ? " sig" : ""}" style="width:${w}%"></div></div></td>
+      <td class="v r">${r.obs >= 0 ? "+" : ""}${(100 * r.obs).toFixed(1)}</td></tr>`;
+  }).join("");
+  $("f2status").textContent = `${G} states and provinces · ${fmt(players.length)} players · ${DRAWS.toLocaleString()} random draws each · data as of ${asOf ?? "—"}`;
+}
+
+const fail = id => e => { $(id).innerHTML = `<b>Couldn't load the data.</b> ${esc(e.message)}`; };
+(async () => {
+  const [asOf, q] = await Promise.all([dataDate(), engine({ homes: "hometowns", sch: "schools", el: "elite", ur: "under_recruited" })]);
+  await fig1(q, asOf).catch(fail("f1status"));
+  await fig2(q, asOf).catch(fail("f2status"));
+})().catch(e => { fail("f1status")(e); fail("f2status")(e); });
+</script>
+</body>
+</html>
