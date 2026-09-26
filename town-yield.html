@@ -40,6 +40,15 @@
   td.st{color:var(--muted);font-size:11.5px;padding-left:6px}
   .barw{width:70px;height:5px;background:var(--line);border-radius:2px;display:inline-block;vertical-align:middle;position:relative} .bar{position:absolute;left:0;top:0;height:5px;background:var(--ink);border-radius:2px}
   .bar.lo{background:var(--dim)}
+  /* Likely-start cell: filled to the luck-adjusted estimate, an 80% range line over it,
+     and a tick at the cohort baseline. */
+  .rng{position:absolute;top:-2px;height:9px;border-left:1px solid var(--muted);border-right:1px solid var(--muted)}
+  .rng::after{content:"";position:absolute;left:0;right:0;top:4px;height:1px;background:var(--muted)}
+  .base{position:absolute;top:-3px;width:1px;height:11px;background:var(--ink);opacity:.55}
+  td.raw{color:var(--dim)}
+  .luck{font-size:12px;line-height:1.45;color:var(--muted);border-left:2px solid var(--line);padding:2px 0 2px 10px}
+  .luck a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--dim)}
+  .sure{color:var(--ink);font-size:9px;margin-left:4px;vertical-align:1px}
   .status{font:400 11.5px var(--mono);color:var(--muted);line-height:1.45} .status b{color:var(--ink);font-weight:500}
   .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)} .legend span{display:flex;align-items:center;gap:6px}
   .sw{width:10px;height:10px;border-radius:50%;display:inline-block}
@@ -65,7 +74,8 @@
     <a href="/about.html">About</a>
   </nav>
   <div><div class="eyebrow">Coaches</div><h1>Which towns' players actually play?</h1>
-    <p class="lede">Every hometown that sent players to this level, ranked by how many of them became starters — and how many never got on the field.</p></div>
+    <p class="lede">Every hometown that sent players to this level, ranked by how often its players start — adjusted for luck.</p></div>
+  <div class="luck">A town's record is a small sample: it takes about 100 players before it is even half signal, and no town has that many. So each town is pulled toward the baseline in proportion to how few players it has, and the range shows where its real rate probably sits. <a href="/insights/town-records.html">Why &rarr;</a></div>
   <div class="row">
     <div><label class="f" for="sport">Sport</label><select id="sport"><option value="MLA">Men's</option><option value="WLA">Women's</option></select></div>
     <div><label class="f" for="div">Level</label><select id="div"><option value="1">Division I</option><option value="2">Division II</option><option value="3">Division III</option></select></div>
@@ -76,9 +86,9 @@
   </div>
   <div class="row">
     <div><label class="f" for="from">Seasons</label><select id="from"></select></div>
-    <div><label class="f" for="minn">Min players</label><select id="minn"><option value="10">10+</option><option value="15">15+</option><option value="25" selected>25+</option><option value="40">40+</option></select></div>
+    <div><label class="f" for="minn">Min players</label><select id="minn"><option value="5">5+</option><option value="10" selected>10+</option><option value="20">20+</option><option value="40">40+</option></select></div>
   </div>
-  <div><label class="f" for="sort">Order</label><select id="sort"><option value="lo">Lowest starter share first — recruited, then sat</option><option value="hi">Highest starter share first — the towns that convert</option><option value="n">Most players first</option></select></div>
+  <div><label class="f" for="sort">Order</label><select id="sort"><option value="hi">Highest likely starter rate first</option><option value="lo">Lowest likely starter rate first</option><option value="n">Most players first</option></select></div>
   <div class="big"><div class="n" id="head">–</div><div class="k" id="headk">loading…</div></div>
   <div class="grid3">
     <div class="card"><div class="n" id="bStart">–</div><div class="k">start · baseline</div></div>
@@ -86,9 +96,10 @@
     <div class="card"><div class="n" id="bBench">–</div><div class="k">bench · baseline</div></div>
   </div>
   <div class="legend">
-    <span><span class="sw" style="background:var(--ink);box-shadow:0 0 0 3px rgba(244,244,242,.18)"></span>starts well above baseline</span>
-    <span><span class="sw" style="background:var(--dim)"></span>around baseline</span>
-    <span><span class="sw" style="background:#1a1c1f;border:1px solid var(--dim)"></span>well below · size = players</span>
+    <span><span class="sw" style="background:var(--ink);box-shadow:0 0 0 3px rgba(244,244,242,.18)"></span>likely starts more (3+ pts)</span>
+    <span><span class="sw" style="background:var(--dim)"></span>within 3 pts — can't tell</span>
+    <span><span class="sw" style="background:#1a1c1f;border:1px solid var(--dim)"></span>likely starts less · size = players</span>
+    <span><b style="color:var(--ink)">&#9679;</b>&nbsp;range clears the baseline</span>
   </div>
   <h2>Towns <span id="townsN"></span></h2>
   <table id="towns"></table>
@@ -151,6 +162,41 @@ function filters() {
   return { sport, div, from, cf, st, w };
 }
 
+// ---- Luck adjustment (2026-09-25) ------------------------------------------------------
+// A town's raw starter share is a small sample. Each town is shrunk toward the cohort
+// baseline p: est = p + R·(raw − p), with R = tau2 / (tau2 + v). v is the town's sampling
+// variance — pooled per-player residuals, so one player's several seasons move together —
+// and tau2 is the real between-town variance: the spread of towns with 10+ players minus
+// their sampling variance. tau2 is estimated on the whole sport/level/seasons cohort (one
+// conference has too few towns) and reproduces the Insights article town-records.html:
+// D1 men 2022–2026, Massapequa ≈ 23%, Islip ≈ 15%, true spread ≈ ±3.7 pts.
+const Z80 = 1.2816;
+const tauCache = new Map();
+const playerRows = w => q(`select u.town || '|' || u.state tk, lower(u.player_name) || '|' || u.school_id pk,
+    count(*)::int n, sum((u.tier='starter')::int)::int s from ur u where ${w} group by 1, 2`);
+function cohortTowns(rows) {
+  let N = 0, S = 0; for (const r of rows) { N += r.n; S += r.s; }
+  const p = S / N; let num = 0, den = 0;
+  for (const r of rows) { num += (r.s - p * r.n) ** 2; den += r.n * r.n; }
+  const sig2 = num / den, towns = new Map();
+  for (const r of rows) { const t = towns.get(r.tk) || { k: 0, n: 0, s: 0, n2: 0 }; t.k++; t.n += r.n; t.s += r.s; t.n2 += r.n * r.n; towns.set(r.tk, t); }
+  for (const t of towns.values()) { t.r = t.s / t.n; t.v = sig2 * t.n2 / (t.n * t.n); }
+  return { p, towns };
+}
+async function signalVar(f) {
+  const key = `${f.sport}|${f.div}|${f.from}`;
+  if (!tauCache.has(key)) {
+    const { towns } = cohortTowns(await playerRows(`u.sport_id='${f.sport}' and u.division=${f.div} and u.year>=${f.from} and u.team_games>=10 and u.town is not null and u.state is not null`));
+    let big = [...towns.values()].filter(t => t.k >= 10);
+    if (big.length < 30) big = [...towns.values()].filter(t => t.k >= 5);
+    const m = big.reduce((a, t) => a + t.r, 0) / big.length;
+    const obs = big.reduce((a, t) => a + (t.r - m) ** 2, 0) / big.length;
+    const noise = big.reduce((a, t) => a + t.v, 0) / big.length;
+    tauCache.set(key, Math.max(obs - noise, 0));
+  }
+  return tauCache.get(key);
+}
+
 async function render() {
   const f = filters(), minN = Number($("minn").value), sort = $("sort").value;
   status("Querying…");
@@ -169,33 +215,48 @@ async function render() {
   const [b] = await q(`select count(*) n, avg((u.tier='starter')::int) s, avg((u.tier='rotation')::int) r, avg((u.tier='bench')::int) b from ur u where ${f.w}`);
   $("bStart").textContent = b.n ? pct(b.s) + "%" : "–"; $("bRot").textContent = b.n ? pct(b.r) + "%" : "–"; $("bBench").textContent = b.n ? pct(b.b) + "%" : "–";
 
+  // Players are counted once per school (a player's seasons used to be counted
+  // separately, so a four-year player looked like four players).
+  const PK = `lower(u.player_name) || '|' || u.school_id`;
   const towns = await q(`
-    select u.town, u.state, median(u.lat) lat, median(u.lng) lng, count(*) n, count(distinct u.school_id) programs,
-           sum((u.tier='starter')::int) st, sum((u.tier='rotation')::int) rot, sum((u.tier='bench')::int) bench,
+    select u.town, u.state, median(u.lat) lat, median(u.lng) lng, count(distinct ${PK})::int players, count(*)::int n,
+           count(distinct u.school_id)::int programs,
+           sum((u.tier='starter')::int)::int st, sum((u.tier='rotation')::int)::int rot, sum((u.tier='bench')::int)::int bench,
            avg(coalesce(u.gp,0)::double/u.team_games) share_gp
     from ur u where ${f.w}
-    group by 1,2 having count(*) >= ${minN}`);
-  for (const t of towns) { t.ps = t.st / t.n; t.pb = t.bench / t.n; t.key = t.town + "|" + t.state; }
-  const order = sort === "hi" ? (a, c) => c.ps - a.ps || c.n - a.n : sort === "lo" ? (a, c) => a.ps - c.ps || c.pb - a.pb || c.n - a.n : (a, c) => c.n - a.n;
+    group by 1,2 having count(distinct ${PK}) >= ${minN}`);
+  const [tau2, coh] = await Promise.all([signalVar(f), playerRows(f.w).then(cohortTowns)]);
+  const p = coh.p;
+  for (const t of towns) {
+    t.key = t.town + "|" + t.state; t.ps = t.st / t.n; t.pb = t.bench / t.n;
+    const v = coh.towns.get(t.key).v, R = tau2 + v > 0 ? tau2 / (tau2 + v) : 0, sd = Math.sqrt(R * v);
+    t.R = R; t.est = p + R * (t.ps - p);
+    t.lo = Math.max(0, t.est - Z80 * sd); t.hi = Math.min(1, t.est + Z80 * sd);
+    t.sure = t.lo > p || t.hi < p;
+  }
+  const order = sort === "hi" ? (a, c) => c.est - a.est || c.players - a.players : sort === "lo" ? (a, c) => a.est - c.est || c.players - a.players : (a, c) => c.players - a.players;
   towns.sort(order);
+  const nSure = towns.filter(t => t.sure).length;
 
-  // Headline: the widest gap at this floor.
+  // Headline: the widest likely gap at this floor, next to what it looked like on paper.
   if (towns.length >= 2) {
-    const hi = [...towns].sort((a, c) => c.ps - a.ps || c.n - a.n)[0], lo = [...towns].sort((a, c) => a.ps - c.ps || c.pb - a.pb || c.n - a.n)[0];
-    $("head").textContent = `${pct(lo.ps)}% vs ${pct(hi.ps)}%`;
-    $("headk").innerHTML = `<b>${cap(lo.town)}, ${lo.state}</b> sent ${lo.n} players to D${f.div}${f.cf ? " programs in this conference" : ""} and ${pct(lo.ps)}% started. <b>${cap(hi.town)}, ${hi.state}</b> sent ${hi.n} and ${pct(hi.ps)}% started. Baseline ${pct(b.s)}%.`;
+    const hi = [...towns].sort((a, c) => c.est - a.est)[0], lo = [...towns].sort((a, c) => a.est - c.est)[0];
+    $("head").textContent = `${pct(lo.est)}% vs ${pct(hi.est)}%`;
+    $("headk").innerHTML = `The widest likely gap at this floor, adjusted for luck. <b>${cap(lo.town)}, ${lo.state}</b>: ${lo.players} players, ${pct(lo.ps)}% started on paper. <b>${cap(hi.town)}, ${hi.state}</b>: ${hi.players} players, ${pct(hi.ps)}% on paper. Baseline ${pct(p)}%. ` +
+      (nSure ? `${nSure} of ${towns.length} towns ${nSure === 1 ? "clears" : "clear"} the baseline with confidence (&#9679;).` : `No town here clears the baseline with confidence.`);
   } else { $("head").textContent = towns.length; $("headk").textContent = `towns with ${minN}+ players match — lower the floor or widen the filters`; }
 
-  // Map: one circle per town, radius by players, tone by starter share vs baseline.
-  const tone = t => t.ps >= b.s * 1.5 ? "hi" : t.ps <= b.s * 0.5 ? "lo" : "mid";
+  // Map: one circle per town, radius by players, tone by the luck-adjusted estimate.
+  // 3 points is about one standard deviation of the real differences between towns.
+  const tone = t => t.est - p >= 0.03 ? "hi" : t.est - p <= -0.03 ? "lo" : "mid";
   const C = { hi: "#f4f4f2", mid: "#55595e", lo: "#1a1c1f" };
   if (layer) map.removeLayer(layer);
   markersByKey = new Map();
   const ms = [];
   for (const z of ["mid", "lo", "hi"]) for (const t of towns) {
     if (tone(t) !== z || t.lat == null) continue;
-    const m = L.circleMarker([t.lat, t.lng], { radius: 3 + 2.2 * Math.sqrt(t.n), fillColor: C[z], fillOpacity: .9, color: z === "lo" ? "#55595e" : "#0a0b0c", weight: 1 })
-      .bindPopup(popup(t, f, b)).on("click", () => pick(t.key, false));
+    const m = L.circleMarker([t.lat, t.lng], { radius: 3 + 3.1 * Math.sqrt(t.players), fillColor: C[z], fillOpacity: .9, color: z === "lo" ? "#55595e" : "#0a0b0c", weight: 1 })
+      .bindPopup(popup(t, f, p)).on("click", () => pick(t.key, false));
     markersByKey.set(t.key, m); ms.push(m);
   }
   layer = L.layerGroup(ms).addTo(map);
@@ -208,9 +269,12 @@ async function render() {
   // Town table.
   $("townsN").textContent = `· ${towns.length} with ${minN}+ players`;
   const shown = towns.slice(0, 60);
-  $("towns").innerHTML = `<tr><th>Town</th><th>Players</th><th>Start</th><th>Bench</th></tr>` + shown.map(t =>
-    `<tr class="pick${t.key === picked ? " on" : ""}" data-key="${t.key}"><td>${cap(t.town)}<span class="st">${abbr(t.state)}</span></td><td class="r"><b>${t.n}</b> <span style="color:var(--dim)">/${t.programs}</span></td>` +
-    `<td class="r"><span class="barw"><span class="bar${t.ps < b.s ? " lo" : ""}" style="width:${Math.min(100, Math.round(t.ps / Math.max(0.01, b.s * 2.5) * 100))}%"></span></span> <b>${pct(t.ps)}%</b></td><td class="r">${pct(t.pb)}%</td></tr>`).join("") +
+  const sc = x => Math.min(100, x / Math.max(0.01, p * 2.5) * 100);
+  $("towns").innerHTML = `<tr><th>Town</th><th>Players</th><th>Likely start</th><th>On paper</th></tr>` + shown.map(t =>
+    `<tr class="pick${t.key === picked ? " on" : ""}" data-key="${t.key}" title="Likely ${pct(t.lo)}–${pct(t.hi)}% (80% range) · ${pct(t.R)}% of this town's record is signal · ${pct(t.pb)}% bench on paper">` +
+    `<td>${cap(t.town)}<span class="st">${abbr(t.state)}</span>${t.sure ? `<span class="sure">&#9679;</span>` : ""}</td><td class="r"><b>${t.players}</b> <span style="color:var(--dim)">/${t.programs}</span></td>` +
+    `<td class="r"><span class="barw"><span class="bar${t.est < p ? " lo" : ""}" style="width:${sc(t.est).toFixed(1)}%"></span><span class="rng" style="left:${sc(t.lo).toFixed(1)}%;width:${(sc(t.hi) - sc(t.lo)).toFixed(1)}%"></span><span class="base" style="left:${sc(p).toFixed(1)}%"></span></span> <b>${pct(t.est)}%</b></td>` +
+    `<td class="r raw">${pct(t.ps)}%</td></tr>`).join("") +
     (towns.length > shown.length ? `<tr><td colspan="4" class="st">…${towns.length - shown.length} more — raise the floor or filter by state</td></tr>` : "");
   document.querySelectorAll("#towns tr.pick").forEach(tr => tr.onclick = () => pick(tr.dataset.key, true));
 
@@ -223,7 +287,8 @@ async function render() {
 
   if (picked && towns.some(t => t.key === picked)) await players(picked, f); else { picked = null; $("playersHdr").hidden = true; $("players").innerHTML = ""; }
   status(`<b>${b.n.toLocaleString()}</b> player-seasons · queried in the browser from Parquet${meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : ""}. ` +
-    `Starter = started ≥60% of team games · rotation = played ≥25% · bench = below that or no stats line. Seasons under 10 games excluded. A town is the hometown's city + state.`);
+    `Starter = started ≥60% of team games · rotation = played ≥25% · bench = below that or no stats line. Seasons under 10 games excluded. A town is the hometown's city + state. ` +
+    `Likely start = the town's rate pulled toward the baseline by how few players it has; the whisker is an 80% range and the tick is the baseline. Players are counted once per school.`);
 }
 
 async function pick(key, fly) {
@@ -247,9 +312,10 @@ async function players(key, f) {
     `<tr><td>${r.player_name}<span class="st">${r.school}</span></td><td class="r">${r.year}</td><td class="r">${r.tier === "bench" ? `<span style="color:var(--dim)">bench</span>` : `<b>${r.gs}</b>/${r.gp} of ${r.team_games}`}</td></tr>`).join("");
 }
 
-function popup(t, f, b) {
-  return `<b>${cap(t.town)}, ${t.state}</b><br>${t.n} players at ${t.programs} D${f.div} program${t.programs === 1 ? "" : "s"} since ${f.from}<br>` +
-    `<b>${pct(t.ps)}%</b> started · ${pct(t.rot / t.n)}% rotation · ${pct(t.pb)}% bench<br><span class="pc">baseline ${pct(b.s)}% start · ${pct(b.b)}% bench · avg ${pct(t.share_gp)}% of games played</span>`;
+function popup(t, f, p) {
+  return `<b>${cap(t.town)}, ${t.state}</b><br>${t.players} players at ${t.programs} D${f.div} program${t.programs === 1 ? "" : "s"} since ${f.from} · ${t.n} player-seasons<br>` +
+    `Likely starter rate <b>${pct(t.est)}%</b>, probably ${pct(t.lo)}–${pct(t.hi)}% · ${pct(t.R)}% signal<br>` +
+    `<span class="pc">On paper ${pct(t.ps)}% started · ${pct(t.rot / t.n)}% rotation · ${pct(t.pb)}% bench · baseline ${pct(p)}% start · avg ${pct(t.share_gp)}% of games played</span>`;
 }
 const cap = s => String(s).replace(/\b\w/g, c => c.toUpperCase()).replace(/\bMt\.?\b/i, "Mt.").replace(/\bSt\.?\b/i, "St.");
 const AB = { "New York": "NY", "New Jersey": "NJ", "Maryland": "MD", "Connecticut": "CT", "Massachusetts": "MA", "Pennsylvania": "PA", "Virginia": "VA", "Ontario": "ON", "British Columbia": "BC", "California": "CA", "Florida": "FL", "Georgia": "GA", "Texas": "TX", "Colorado": "CO", "Ohio": "OH", "Michigan": "MI", "Illinois": "IL", "Minnesota": "MN", "North Carolina": "NC", "New Hampshire": "NH", "District Of Columbia": "DC", "Delaware": "DE", "Rhode Island": "RI", "Vermont": "VT", "Maine": "ME", "Oregon": "OR", "Washington": "WA", "Utah": "UT", "Alberta": "AB", "Missouri": "MO", "Indiana": "IN", "Wisconsin": "WI", "Tennessee": "TN", "South Carolina": "SC", "Kentucky": "KY", "Arizona": "AZ", "Nevada": "NV" };
