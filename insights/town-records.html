@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!--
+  Goalbound Insights, article 2 (2026-09-25). DRAFT for Tom's edit.
+  Numbers re-run 2026-09-25 against the corrected export (geocode fix) with
+  goalbound/scratchpad/geo-questions/{town_null,state_null,town_reliability}.py;
+  their method is in "How we counted" below and in the site README, "Insights".
+  Figure 1 is live and reshuffles in the browser; Figure 2 is the fixed result of the
+  reliability simulation (it is too slow to run in a page), so re-run it after a data
+  refresh. This article supersedes the "spread between towns is enormous" line in
+  docs/GEOGRAPHY-FINDINGS.md §3.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Massapequa or Islip? A town's record is mostly luck · Goalbound</title>
+<meta name="description" content="Massapequa's D1 players start; Islip's sit. Shuffle every player's hometown at random and towns like both appear anyway. A town needs about 100 players before its record is half signal.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Massapequa or Islip? A town's record is mostly luck.">
+<meta property="og:description" content="Shuffle every D1 player's hometown at random and towns like Massapequa and Islip appear anyway. Judge the region, not the town.">
+<meta property="og:site_name" content="Goalbound">
+
+<!-- Google Analytics 4 — property "GoalBound" (418596490), stream goalbound.co. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3V9JJ6DNLY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag("js", new Date());
+  gtag("config", "G-3V9JJ6DNLY");
+</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/insights/insights.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="/"><i></i><span>GOALBOUND<sup>&reg;</sup></span></a>
+      <span class="links">
+        <a class="n" href="/hometown.html">Recruits</a>
+        <a class="n" href="/town-yield.html">Coaches</a>
+        <a class="n" href="/insights/" aria-current="page">Insights</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound%20%E2%80%94%20PLL%2FNLL">Pro</a>
+        <a class="n" href="/about.html">About</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound">Contact</a>
+      </span>
+      <a class="cta" href="https://forms.gle/o9eEppHEdVghhQAZ8" target="_blank" rel="noopener">Book a walkthrough</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="hero">
+      <div class="eyebrow"><a href="/insights/">Insights</a> &middot; Men's lacrosse &middot; For coaches and families</div>
+      <h1>Massapequa or Islip? A town's record is mostly luck.</h1>
+      <div class="byline">Tom Garvey &middot; 25 September 2026 &middot; Division I rosters and statistics 2022–2026</div>
+    </section>
+
+    <article class="prose">
+      <p class="lede">Two Long Island towns fourteen miles apart look like opposites in Division I. Massapequa's players start; Islip's sit. It is exactly the kind of pattern a recruiter remembers — and most of it is chance.</p>
+
+      <h2>Two towns</h2>
+      <p>Since 2022, 25 men from Massapequa, New York have played Division I lacrosse, at 17 programs. They started in 40% of their seasons and spent only 10% on the bench. Across D1, players start in 18% of seasons.</p>
+      <p>Over the same five years, 19 men from Islip played at 16 programs. <b>They started in none of their 39 seasons</b>, and sat on the bench in almost half.</p>
+      <p>Taken at face value, that is a recruiting rule: go to Massapequa, skip Islip.</p>
+
+      <h2>Shuffle the players</h2>
+      <p>Here is the test. Take every Division I player from 2022 to 2026 — 7,762 of them, from 1,880 towns — and deal them back out to towns at random, each town keeping its number of players. Now a hometown means nothing at all. Then compare the towns with at least 25 player-seasons, just as before.</p>
+
+      <figure id="fig1">
+        <h3>Towns by share of seasons their players started — real, and shuffled</h3>
+        <div class="sub">Division I men, 2022–2026. Towns with at least 25 player-seasons. In the shuffled panel every player keeps his own record; only the hometown is dealt at random.</div>
+        <div class="ctl"><button type="button" class="again" id="again" disabled>Shuffle again</button></div>
+        <div class="hpanel">
+          <div class="ht"><span>Real towns</span><span class="hs" id="hsReal"></span></div>
+          <div class="hist" id="hReal"></div>
+          <div class="hnote" id="nReal"></div>
+        </div>
+        <div class="hpanel">
+          <div class="ht"><span>Shuffled at random</span><span class="hs" id="hsShuf"></span></div>
+          <div class="hist alt" id="hShuf"></div>
+          <div class="haxis" id="axis"></div>
+        </div>
+        <div class="fig-status" id="f1status">Loading the data…</div>
+        <figcaption>Each bar is the number of towns in a five-point band of starting share. Hover a bar for the towns in it. Live query over Goalbound's roster and statistics tables; every shuffle is new.</figcaption>
+      </figure>
+
+      <p>We ran the shuffle 2,000 times. <b>In 80% of them, luck alone produced a town whose players started at least 40% of the time</b> — a Massapequa. Luck also produced towns where nobody started: 1.5 per shuffle on average, and three or more in one shuffle in six. The real data has three: Islip, Miller Place and Sparta, New Jersey.</p>
+      <p>The real towns do spread out a little further than the shuffled ones, by more than luck explains, so some towns genuinely produce more starters than others. You just can't tell which from five seasons of one town.</p>
+
+      <h2>How many players does a town need?</h2>
+      <p>Split each town's record into signal and luck, and a town needs <b>about 100 Division I players before its starting rate is even half signal</b>. No town comes close. The largest had 64 players over the five seasons, and only five had 50 or more.</p>
+
+      <figure id="fig2">
+        <h3>How much of a town's starting rate is signal, not luck</h3>
+        <div class="sub">By the number of Division I players the town produced, 2022–2026.</div>
+        <table class="bars" id="f2"></table>
+        <figcaption>From 6,000 random draws of players at each size, against the spread between real towns with at least 10 players. Computed 25 September 2026.</figcaption>
+      </figure>
+
+      <p>Adjusted for that, the best estimate is that about 23% of Massapequa's players start, and about 15% of Islip's. There is a gap. It is a small fraction of the 40-to-0 on paper.</p>
+
+      <h2>What does hold up</h2>
+      <p>Bigger groups are a different story, because hundreds of players wash the luck out. Canadian players start more and sit less than a random draw of the same number of D1 players; luck matched them in none of 4,000 shuffles. That is the finding behind <a href="/insights/canada.html">our piece on Canada</a>. Florida's 43% bench rate also holds up, just.</p>
+      <p>Other state patterns that look just as striking do not. Georgia's and Colorado's high bench rates, and the low starting rates of players from Texas, Ohio and Virginia, fall within what luck produces once you allow for testing 21 states at once.</p>
+
+      <h2>What to do with it</h2>
+      <p><b>Coaches:</b> judge a town by its region, not its record. A town's run of starters, or of players who never see the field, is mostly the particular kids who happened to come through it. The region, with hundreds of players, is where the signal is.</p>
+      <p><b>Families:</b> your town's record is not your ceiling. Islip's zero is what chance does to 19 players.</p>
+
+      <h2>How we counted</h2>
+      <ul>
+        <li><b>Players:</b> Division I men, 2022–2026, counted once per school. Seasons where the team played fewer than 10 games are left out.</li>
+        <li><b>Starter:</b> started at least 60% of the team's games that season. <b>Bench:</b> played in fewer than 25%, or had no stats line.</li>
+        <li><b>The shuffle:</b> every player keeps his own seasons and results; only his hometown is reassigned, and every town keeps its number of players. The comparison uses towns with at least 25 player-seasons, the same floor as the town tables.</li>
+        <li><b>Signal share:</b> the spread between real towns (at least 10 players) minus the spread luck produces at the same size. The true difference between towns is about 3.6 percentage points either side of the 18% average.</li>
+        <li><b>States and Canada:</b> each group against 4,000 random draws of the same number of players. A result counts only if it would survive testing all 21 groups with at least 150 player-seasons.</li>
+      </ul>
+    </article>
+
+    <div class="next">
+      <div class="num">NEXT</div>
+      <div>
+        <p>A town's record is a small sample. Where its players went is still worth knowing — just read it as a handful of stories, not a verdict.</p>
+        <a href="/hometown.html?country=United%20States&amp;state=New%20York&amp;town=Islip&amp;sport=MLA"><s>&rarr;</s>Where players from Islip went</a><br>
+        <a href="/insights/canada.html"><s>&rarr;</s>Canada is the most under-recruited source in men's college lacrosse</a>
+      </div>
+    </div>
+
+    <aside class="sponsor" aria-label="Sponsor">
+      <div>
+        <div class="lbl">Sponsor</div>
+        <p>Reach the lacrosse families and coaches who read Goalbound. One sponsor per page.</p>
+      </div>
+      <a href="mailto:tom@goalbound.co?subject=Sponsoring%20Goalbound">Sponsor this page</a>
+    </aside>
+
+    <section class="signup" aria-labelledby="su">
+      <h3 id="su">Get the next insight</h3>
+      <p>One email when a new finding goes up. Nothing else.</p>
+      <form novalidate>
+        <input type="email" name="email" placeholder="you@school.edu" autocomplete="email" aria-label="Email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+      <div class="msg" aria-live="polite"></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap">
+    <span>Goalbound LLC</span>
+    <span>2015–2026 rosters · game statistics · All-Americans · Division I–III · men's and women's lacrosse</span>
+    <a href="mailto:tom@goalbound.co">tom@goalbound.co</a>
+  </div>
+  <div class="wrap tm">GOALBOUND<sup>&reg;</sup> is a registered service mark of Goalbound, LLC &middot; U.S. Reg. No. 8,068,885</div>
+</footer>
+
+<script type="module">
+import { engine, dataDate, tooltips, signup, fmt, esc } from "/insights/insights.js";
+const $ = id => document.getElementById(id);
+signup();
+tooltips($("fig1")); tooltips($("fig2"));
+
+// ---- Figure 2: fixed result of town_reliability.py (2026-09-25) ----------------------
+const RELIABILITY = [
+  { players: 10, signal: 0.09, towns: 195 },
+  { players: 25, signal: 0.21, towns: 35 },
+  { players: 50, signal: 0.34, towns: 5 },
+  { players: 100, signal: 0.50, towns: 0 },
+];
+$("f2").innerHTML = `<tr><th>Players from the town</th><th></th><th class="r">Signal</th></tr>` + RELIABILITY.map(r =>
+  `<tr data-tip="<b>${r.players} players</b><br>${Math.round(r.signal * 100)}% of the town's starting rate is signal, ${100 - Math.round(r.signal * 100)}% luck<br>${r.towns} towns had at least this many, 2022–2026">
+     <td class="name">${r.players} <span style="color:var(--dim)">· ${r.towns} towns</span></td>
+     <td><div class="track"><div class="bar" style="width:${r.signal * 100}%;background:var(--m1)"></div></div></td>
+     <td class="v r">${Math.round(r.signal * 100)}%</td></tr>`).join("");
+
+// ---- Figure 1: real vs shuffled ----------------------------------------------------------
+const BINS = 11, FLOOR = 25;                      // 5-point bands, 0–55%; towns with >= 25 player-seasons
+const bin = share => Math.min(BINS - 1, Math.floor(share * 20 + 1e-9));
+const title = s => s.replace(/\b\w/g, c => c.toUpperCase());
+let towns, players;
+
+function summarise(groups) {                      // groups: [{name, recs:[{n,s}]}]
+  const kept = [];
+  for (const g of groups) {
+    let ps = 0, st = 0; for (const r of g.recs) { ps += r.n; st += r.s; }
+    if (ps >= FLOOR) kept.push({ name: g.name, share: st / ps, ps, k: g.recs.length });
+  }
+  const m = kept.reduce((a, t) => a + t.share, 0) / kept.length;
+  const sd = Math.sqrt(kept.reduce((a, t) => a + (t.share - m) ** 2, 0) / kept.length);
+  return { kept, sd, zeros: kept.filter(t => t.share === 0).length, top: Math.max(...kept.map(t => t.share)) };
+}
+
+function draw(el, statEl, sum, max, named) {
+  const counts = Array(BINS).fill(0), who = Array.from({ length: BINS }, () => []);
+  for (const t of sum.kept) { const b = bin(t.share); counts[b]++; who[b].push(t); }
+  el.innerHTML = counts.map((c, i) => {
+    const lo = i * 5, list = who[i].sort((a, b) => b.ps - a.ps);
+    const tip = `<b>${lo}–${lo + 5}% started</b><br>${c} town${c === 1 ? "" : "s"}` +
+      (named && list.length ? `<br>${list.slice(0, 6).map(t => esc(title(t.name))).join(", ")}${list.length > 6 ? `, +${list.length - 6} more` : ""}` : "");
+    return `<div class="hit" data-tip="${tip}"><b style="height:${(c / max * 100).toFixed(1)}%"></b></div>`;
+  }).join("");
+  statEl.textContent = `${sum.kept.length} towns · ${sum.zeros} with no starters · top ${Math.round(sum.top * 100)}% · spread ±${(sum.sd * 100).toFixed(1)} pts`;
+}
+
+function shuffleOnce() {
+  const pool = players.slice();
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  let i = 0;
+  return towns.map(t => ({ name: t.name, recs: pool.slice(i, i += t.recs.length) }));
+}
+
+let real;
+function render() {
+  const shuf = summarise(shuffleOnce());
+  const max = Math.max(...[real, shuf].flatMap(s => { const c = Array(BINS).fill(0); s.kept.forEach(t => c[bin(t.share)]++); return c; }));
+  draw($("hReal"), $("hsReal"), real, max, true);
+  draw($("hShuf"), $("hsShuf"), shuf, max, false);
+}
+
+(async () => {
+  const [asOf, q] = await Promise.all([dataDate(), engine({ ur: "under_recruited" })]);
+  const rows = await q(`
+    select town || ', ' || state tk, lower(player_name) || '|' || school_id pk,
+           count(*)::int n, sum((tier = 'starter')::int)::int s   -- sum() is a 128-bit int in DuckDB; cast so JS gets a number
+    from ur
+    where sport_id = 'MLA' and division = 1 and year between 2022 and 2026 and team_games >= 10 and town is not null
+    group by 1, 2`);
+  const byTown = new Map();
+  for (const r of rows) { if (!byTown.has(r.tk)) byTown.set(r.tk, []); byTown.get(r.tk).push({ n: r.n, s: r.s }); }
+  towns = [...byTown].map(([name, recs]) => ({ name, recs }));
+  players = towns.flatMap(t => t.recs);
+  real = summarise(towns);
+  $("axis").innerHTML = Array.from({ length: BINS }, (_, i) => `<span>${i * 5}%</span>`).join("");
+  const at = share => bin(share) + 1;
+  $("nReal").innerHTML =
+    `<span style="grid-column:${at(0)} / span 3;text-align:left">&uarr; Islip 0%</span>` +
+    `<span style="grid-column:${at(0.40)} / span 3;text-align:left">&uarr; Massapequa 40%</span>`;
+  render();
+  $("again").disabled = false;
+  $("again").onclick = render;
+  $("f1status").textContent = `${fmt(players.length)} players from ${fmt(towns.length)} towns · data as of ${asOf ?? "—"}`;
+})().catch(e => { $("f1status").innerHTML = `<b>Couldn't load the data.</b> ${esc(e.message)}`; });
+</script>
+</body>
+</html>

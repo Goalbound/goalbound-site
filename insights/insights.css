@@ -157,3 +157,19 @@ footer a { text-decoration: none; }
 footer a:hover { color: var(--ink); }
 footer .tm { margin-top: 10px; font-size: 11px; opacity: .85; }
 footer .tm sup { font-size: .72em; vertical-align: super; }
+
+/* Histogram small multiples (town-records.html): real vs shuffled, one shared axis. */
+.hpanel { margin-top: 16px; }
+.hpanel .ht { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 500 12px/1.4 var(--body); color: var(--ink); }
+.hpanel .hs { font: 400 11.5px/1.4 var(--mono); color: var(--muted); }
+.hist { display: grid; grid-template-columns: repeat(11, 1fr); gap: 2px; height: 120px; align-items: end; margin-top: 8px; border-bottom: 1px solid var(--line); }
+.hist b { display: block; background: var(--m1); border-radius: 4px 4px 0 0; min-height: 0; }
+.hist.alt b { background: var(--m2); }
+.hist b:hover { outline: 1px solid var(--ink); outline-offset: 1px; }
+.hist .hit { height: 100%; display: flex; align-items: end; }
+.hist .hit b { width: 100%; }
+.haxis, .hnote { display: grid; grid-template-columns: repeat(11, 1fr); gap: 2px; margin-top: 5px; font: 400 10px/1.2 var(--mono); color: var(--dim); text-align: center; }
+.hnote { color: var(--muted); font-size: 10.5px; }
+.hnote span { white-space: nowrap; }
+button.again { font: 500 12px var(--body); color: var(--ground); background: var(--ink); border: 0; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+button.again:hover { background: #fff; }
