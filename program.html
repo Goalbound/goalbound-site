@@ -279,9 +279,27 @@ function badge(el, p) {
   } else { el.style.background = ""; el.style.color = ""; el.style.borderColor = ""; }
 }
 
+// ---- Head tags -------------------------------------------------------------------------
+// The static head block is written by seo/build.py and describes the directory. A program
+// view is a different page to a crawler and to a share card, so it overwrites them. Captured
+// once, before anything changes them, so returning to the directory can restore them.
+const HEAD0 = {
+  title: document.title,
+  desc: (document.querySelector('meta[name="description"]') || {}).content || "",
+  ogUrl: (document.querySelector('meta[property="og:url"]') || {}).content || "",
+};
+function setHead(title, desc, ogUrl) {
+  document.title = title;
+  const set = (sel, v) => { const el = document.querySelector(sel); if (el) el.setAttribute("content", v); };
+  set('meta[name="description"]', desc);
+  set('meta[property="og:title"]', title.replace(/ \u00b7 Goalbound$/, ""));
+  set('meta[property="og:description"]', desc);
+  set('meta[property="og:url"]', ogUrl);
+}
+
 // ---- Directory -------------------------------------------------------------------------
 function renderDirectory() {
-  document.title = "College lacrosse programs: rosters, hometowns and All-Americans · Goalbound";
+  setHead(HEAD0.title, HEAD0.desc, HEAD0.ogUrl);
   const sport = $("dSport").value, div = $("dDiv").value, find = $("dFind").value.trim().toLowerCase(), old = $("dOld").checked;
   const list = programs.filter(p => p.sport_id === sport && (!div || p.div === div) && (old || p.status !== "inactive") &&
     (!find || [p.display_name, p.nickname, p.conference, p.abbreviation, p.state].some(s => (s || "").toLowerCase().includes(find))));
@@ -314,7 +332,11 @@ async function renderProgram(prog) {
   const [[p], seasons, coaches, staff] = await Promise.all([
     q(`select * from prog where ${where}`), q(`select * from seas where ${where} order by year`),
     q(`select * from coach where ${where} order by last_year desc nulls last, seasons_here desc`), q(`select * from staff where ${where} order by ord`)]);
-  document.title = `${name} ${sport === "MLA" ? "men's" : "women's"} lacrosse: profile, roster and hometowns · Goalbound`;
+  const sportWord = sport === "MLA" ? "men's" : "women's";
+  const span = p.first_season && p.last_season ? `${p.first_season}\u2013${p.last_season}` : "2015\u20132026";
+  setHead(`${name} ${sportWord} lacrosse: profile, roster and hometowns \u00b7 Goalbound`,
+          `${name} ${sportWord} lacrosse: every roster ${span}, where its players come from, its All-Americans and its career scoring leaders.`,
+          `https://goalbound.co/program.html?sport=${sport}&school=${id}`);
 
   // Header.
   badge($("pBadge"), prog);

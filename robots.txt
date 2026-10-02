@@ -3,3 +3,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://goalbound.co/sitemap.xml
+Sitemap: https://goalbound.co/sitemap-programs.xml
