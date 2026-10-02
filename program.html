@@ -32,7 +32,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site-header.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="/vendor/leaflet-1.9.4/leaflet.min.css">
 <style>
   :root{--ground:#0a0b0c;--panel:#111214;--ink:#f4f4f2;--muted:#8b8f94;--dim:#55595e;--line:#222427;
     /* chart greys: the Insights set, validated against --ground with the dataviz checker */
@@ -188,8 +188,9 @@
 </aside>
 <div id="map"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/vendor/leaflet-1.9.4/leaflet.min.js"></script>
 <script type="module">
+const HAS_MAP = typeof L !== "undefined";
 // The program template: one page profiles any college program from ?sport=&school=, and
 // with no ?school= it is the directory of all of them. No query engine: the export writes
 // /data/programs/index.json for the directory and /data/programs/<SPORT>/<id>.json with
@@ -226,9 +227,14 @@ async function boot() {
   meta = m;
   programs = table(index).map(p => ({ ...p, display_name: p.school, div: p.division, y0: p.first_season, y1: p.last_season, lat: p.campus_lat, lon: p.campus_lon }));
 
-  map = L.map("map", { scrollWheelZoom: true }).setView([39.5, -86], 5);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
-  requestAnimationFrame(() => map.invalidateSize());
+  // The map is decoration; the roster, records and staff are the page. If Leaflet didn't
+  // load, everything else still renders. Google's renderer showed "L is not defined" on
+  // 2026-10-02, which used to abort the whole page.
+  if (HAS_MAP) {
+    map = L.map("map", { scrollWheelZoom: true }).setView([39.5, -86], 5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
+    requestAnimationFrame(() => map.invalidateSize());
+  }
 
   ["dSport", "dDiv"].forEach(id => $(id).onchange = () => { setParams({ sport: $("dSport").value }, true); route(); });
   $("dFind").oninput = $("dOld").onchange = () => renderDirectory();
@@ -313,11 +319,13 @@ function renderDirectory() {
       `<tr><td>${progLink(sport, p.school_id, p.display_name)}${tag(p)}</td><td class="r">${p.y0 ? `${p.y0}–${String(p.y1).slice(2)}` : ""}</td></tr>`).join(""); }).join("")
     : `<tr><td class="none">No program matches.</td></tr>`;
 
+  if (HAS_MAP) {
   if (layer) map.removeLayer(layer);
   const ms = list.filter(p => p.lat != null).map(p => L.circleMarker([p.lat, p.lon], { radius: 5, fillColor: "#f4f4f2", fillOpacity: .9, color: "#0a0b0c", weight: 1 })
     .bindPopup(`<a data-prog href="${progHref(sport, p.school_id)}">${html(p.display_name)}</a><br><span class="pc">D${p.div} · ${html(p.conference || "")}</span>`));
   layer = L.layerGroup(ms).addTo(map);
   fit(ms.map(m => m.getLatLng()));
+  }
   const n = s => list.filter(p => p.status === s).length;
   status(`<b>${n("active")}</b> ${SPORT[sport].toLowerCase()} programs${div ? ` in Division ${div}` : ""}${find ? ` matching “${html(find)}”` : ""}` +
     (n("upcoming") ? `, plus ${n("upcoming")} in the NCAA's 2026–27 list that have not played yet` : "") + (n("inactive") ? `, and ${n("inactive")} that no longer play` : "") +
@@ -482,7 +490,7 @@ function renderCampus(p) {
       p.avg_rainfall != null ? `${Math.round(p.avg_rainfall)} in rain · ${Math.round(p.avg_snowfall)} in snow` : ""],
     ["Map", p.campus_lat != null ? `<a href="#" id="toCampus" style="color:var(--ink)">Show the campus</a>` : null, p.campus_exact ? "" : "city centre — no exact campus on file"],
   ]) || `<tr><td class="none">No location on file.</td></tr>`;
-  const t = $("toCampus"); if (t) t.onclick = e => { e.preventDefault(); lastFit = null; map.setView([p.campus_lat, p.campus_lon], 15, { animate: false }); };
+  const t = $("toCampus"); if (t && HAS_MAP) t.onclick = e => { e.preventDefault(); lastFit = null; map.setView([p.campus_lat, p.campus_lon], 15, { animate: false }); };
 }
 
 const TEST = { 1: "Required", 2: "Recommended", 3: "Neither required nor recommended", 5: "Considered but not required" };
@@ -527,6 +535,7 @@ async function renderRoster() {
     `<td class="r">${pick === "all" ? r.year : html(shortPos(r.pos))}</td><td class="r">${r.gp ?? "–"}</td><td class="r"><b>${r.pts ?? "–"}</b></td></tr>`).join("")
     : `<tr><td class="none">No roster on file.</td></tr>`;
 
+  if (HAS_MAP) {
   if (layer) map.removeLayer(layer);
   const seen = new Map(), ms = [];
   for (const r of list) {
@@ -541,9 +550,10 @@ async function renderRoster() {
   if (p.campus_lat != null) ms.push(L.circleMarker([p.campus_lat, p.campus_lon], { radius: 8, fillColor: "#0a0b0c", fillOpacity: 1, color: "#f4f4f2", weight: 2.5 }).bindPopup(`<b>${html(prog.display_name)}</b>${p.venue ? `<br><span class="pc">${html(p.venue)}</span>` : ""}`));
   layer = L.layerGroup(ms).addTo(map);
   fit(ms.map(m => m.getLatLng()));
+  }
 
   const mapped = list.filter(r => r.lat != null).length;
-  status(`<b>${list.length}</b> players shown, <b>${mapped}</b> with a mapped hometown · ring = campus · queried in the browser from Parquet${meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : ""}. ` +
+  status(`<b>${list.length}</b> players shown, <b>${mapped}</b> with a mapped hometown · ring = campus · loaded from one file per program${meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : ""}. ` +
     `Records and team stats: the NCAA through 2024 (and women's 2025), the school's athletics site for men's 2025 and all of 2026. Head coaches before 2026 from the NCAA's coach records.`);
 }
 const shortClass = c => ({ "Graduate Student": "Gr", "Fifth Year": "5th", "Sixth Year": "6th", Freshman: "Fr", Sophomore: "So", Junior: "Jr", Senior: "Sr", "Redshirt Freshman": "R-Fr", "Redshirt Sophomore": "R-So", "Redshirt Junior": "R-Jr", "Redshirt Senior": "R-Sr", Redshirt: "RS" })[c] || c || "";
@@ -554,6 +564,7 @@ const shortPos = p => String(p ?? "–").replace(/Long Stick Midfield/g, "LSM").
 // remembered and redone whenever the container changes size.
 let lastFit = null;
 function fit(pts) {
+  if (!HAS_MAP) return;
   pts = pts.filter(p => p.lat > 15 && p.lat < 62 && p.lng > -140 && p.lng < -50);   // North America only; a few hometowns are overseas
   lastFit = pts.length ? L.latLngBounds(pts).pad(.15) : null;
   map.invalidateSize();
