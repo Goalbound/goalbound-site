@@ -472,10 +472,13 @@ function renderRecord(seasons, sport) {
   });
   const per = (a, g) => a == null || !g ? "–" : (a / g).toFixed(1);
   const rate = (a, b) => a == null || !b ? "–" : `${Math.round(a / b * 100)}%`;
-  $("seasons").innerHTML = `<tr><th>Season</th><th>W–L</th><th>Conf.</th><th title="Goals per game">GF/G</th><th title="Goals against per game">GA/G</th><th title="Goals per shot">Sh%</th><th title="${sport === "WLA" ? "Draw controls are not in the data; faceoffs where reported" : "Faceoffs won"}">FO%</th></tr>` +
+  // Women's lacrosse has draws, not faceoffs, and the NCAA draw-control column was never
+  // read (export.py, WLA_RELABEL), so women's pages drop the column rather than show dashes.
+  const fo = sport !== "WLA";
+  $("seasons").innerHTML = `<tr><th>Season</th><th>W–L</th><th>Conf.</th><th title="Goals per game">GF/G</th><th title="Goals against per game">GA/G</th><th title="Goals per shot">Sh%</th>${fo ? `<th title="Faceoffs won">FO%</th>` : ""}</tr>` +
     [...seasons].reverse().filter(s => s.wins != null || s.goals != null).map(s => { const g = (s.wins ?? 0) + (s.losses ?? 0) + (s.ties ?? 0);
       return `<tr><td>${s.year}${s.head_coach ? `<span class="st">${html(s.head_coach)}</span>` : ""}</td><td class="r"><b>${wl(s.wins, s.losses, s.ties)}</b></td><td class="r">${s.conf_wins != null ? `${s.conf_wins}–${s.conf_losses}` : "–"}</td>` +
-        `<td class="r">${per(s.goals, g)}</td><td class="r">${per(s.opp_goals, g)}</td><td class="r">${rate(s.goals, s.shots)}</td><td class="r">${rate(s.faceoffs_won, s.faceoffs_taken)}</td></tr>`; }).join("");
+        `<td class="r">${per(s.goals, g)}</td><td class="r">${per(s.opp_goals, g)}</td><td class="r">${rate(s.goals, s.shots)}</td>${fo ? `<td class="r">${rate(s.faceoffs_won, s.faceoffs_taken)}</td>` : ""}</tr>`; }).join("");
 }
 
 function renderCoaches(p, coaches, staff) {
