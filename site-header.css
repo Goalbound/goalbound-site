@@ -1,0 +1,50 @@
+/*
+  Site header for the tool pages (2026-10-01). The home, About, Insights, Advertise and
+  Privacy pages carry this header in their own CSS; the seven sidebar-and-map pages
+  (hometown, program, town-yield, yield, elite-footprint, explore, all-americans) had
+  only a logo in the sidebar, so a visitor who clicked "Recruits" or "Coaches" lost the
+  site's navigation. Tom asked for the header everywhere, desktop above all.
+
+  Everything is scoped to .site-header, because those pages style bare `aside`, `nav`
+  and `.logo` for their own sidebar. The look matches index.html's header; keep the
+  two in step. A tool page opts in with <body class="tool"> and the header markup as
+  the first child of <body>.
+*/
+.site-header { --sh-ground: #0a0b0c; --sh-ink: #f4f4f2; --sh-muted: #8b8f94; --sh-line: #212327;
+  border-bottom: 1px solid var(--sh-line); background: var(--sh-ground); }
+.site-header .sh-wrap { padding: 0 20px; }
+.site-header nav { display: flex; align-items: center; gap: 28px; padding: 12px 0; }
+.site-header .sh-logo { font: 700 20px/1 "Barlow Condensed", "Arial Narrow", Impact, sans-serif; letter-spacing: .05em;
+  text-decoration: none; color: var(--sh-ink); display: flex; align-items: center; gap: 9px; margin-right: auto; }
+.site-header .sh-logo i { width: 8px; height: 8px; border-radius: 50%; background: var(--sh-ink); display: inline-block; }
+.site-header .sh-logo sup { font-size: .46em; vertical-align: super; letter-spacing: 0; }
+.site-header .sh-links { display: flex; gap: 22px; }
+.site-header a.n { font: 500 13px "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; text-decoration: none; color: var(--sh-muted); }
+.site-header a.n:hover, .site-header a.n[aria-current="page"] { color: var(--sh-ink); }
+.site-header a.cta { font: 600 13px "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; text-decoration: none; color: var(--sh-ground);
+  background: var(--sh-ink); padding: 7px 13px; border-radius: 4px; white-space: nowrap; }
+.site-header a.cta:hover { background: #fff; }
+.site-header a:focus-visible { outline: 2px solid var(--sh-ink); outline-offset: 3px; }
+
+/* Phones: links wrap onto their own row under the logo and scroll sideways, as on the
+   home page. */
+@media (max-width: 760px) {
+  .site-header .sh-wrap { padding: 0 16px; }
+  .site-header nav { flex-wrap: wrap; gap: 0 16px; }
+  .site-header .sh-links { order: 3; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--sh-line);
+    gap: 18px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .site-header .sh-links::-webkit-scrollbar { display: none; }
+  .site-header a.n { white-space: nowrap; }
+}
+
+/* The header has the logo, so the sidebar's own logo goes. */
+body.tool > aside > .logo { display: none; }
+
+/* Desktop: the page is still exactly one screen tall. The header takes its natural
+   height, and the sidebar and map share the rest, each scrolling or panning on its own. */
+@media (min-width: 761px) {
+  body.tool { grid-template-rows: auto minmax(0, 1fr); }
+  body.tool > .site-header { grid-column: 1 / -1; }
+  body.tool > aside { min-height: 0; }
+  body.tool > #map { height: auto; min-height: 0; }
+}

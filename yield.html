@@ -31,7 +31,8 @@
 </script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/site-header.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
   :root{--ground:#0a0b0c;--panel:#111214;--ink:#f4f4f2;--muted:#8b8f94;--dim:#55595e;--line:#222427;
@@ -77,7 +78,23 @@
   @media(max-width:760px){body{grid-template-columns:1fr;height:auto}#map{height:60vh}aside{border-right:0;border-bottom:1px solid var(--line)}}
 </style>
 </head>
-<body>
+<body class="tool">
+<header class="site-header">
+  <div class="sh-wrap">
+    <nav aria-label="Site">
+      <a class="sh-logo" href="/"><i></i><span>GOALBOUND<sup>&reg;</sup></span></a>
+      <span class="sh-links">
+        <a class="n" href="/hometown.html">Recruits</a>
+        <a class="n" href="/town-yield.html" aria-current="page">Coaches</a>
+        <a class="n" href="/insights/">Insights</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound%20%E2%80%94%20PLL%2FNLL">Pro</a>
+        <a class="n" href="/about.html">About</a>
+        <a class="n" href="mailto:tom@goalbound.co?subject=Goalbound">Contact</a>
+      </span>
+      <a class="cta" href="https://forms.gle/o9eEppHEdVghhQAZ8" target="_blank" rel="noopener">Book a walkthrough</a>
+    </nav>
+  </div>
+</header>
 <aside>
   <a class="logo" href="/"><i></i><span>GOALBOUND<sup>&reg;</sup></span></a>
   <nav class="pages">
