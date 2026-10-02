@@ -57,6 +57,7 @@
   <a class="logo" href="/"><i></i><span>GOALBOUND<sup>&reg;</sup></span></a>
   <nav class="pages">
     <a href="/hometown.html">Your town</a>
+    <a href="/program.html">Programs</a>
     <a href="/town-yield.html">Town yield</a>
     <a href="/yield.html" aria-current="page">My program</a>
     <a href="/elite-footprint.html">Top-10</a>
@@ -177,10 +178,10 @@ async function render() {
   const best = [...big].sort((a, b) => (b.ps - (b.peerS ?? b.ps)) - (a.ps - (a.peerS ?? a.ps)))[0];
   $("head").textContent = `${mine.n} players · ${states.length} states`;
   if (worst && worst.ps < (worst.peerS ?? 1) - 0.05) {
-    $("headk").innerHTML = `<b>${me.display_name}</b> since ${f.from}. Its ${worst.n} players from <b>${worst.st}</b> started ${pct(worst.ps)}% of the time; ${peerLabel} starts ${worst.st} players ${pct(worst.peerS)}% of the time.` +
+    $("headk").innerHTML = `<b><a href="/program.html?sport=${f.sport}&school=${f.school}" style="color:inherit">${me.display_name}</a></b> since ${f.from}. Its ${worst.n} players from <b>${worst.st}</b> started ${pct(worst.ps)}% of the time; ${peerLabel} starts ${worst.st} players ${pct(worst.peerS)}% of the time.` +
       (best && best !== worst && best.ps > (best.peerS ?? 0) + 0.05 ? ` <b>${best.st}</b> runs the other way: ${pct(best.ps)}% vs ${pct(best.peerS)}%.` : "");
   } else {
-    $("headk").innerHTML = `<b>${me.display_name}</b> since ${f.from}. No state with 6+ recruits converts materially worse for you than for ${peerLabel}.` + (best && best.ps > (best.peerS ?? 0) + 0.05 ? ` <b>${best.st}</b> converts best: ${pct(best.ps)}% vs ${pct(best.peerS)}%.` : "");
+    $("headk").innerHTML = `<b><a href="/program.html?sport=${f.sport}&school=${f.school}" style="color:inherit">${me.display_name}</a></b> since ${f.from}. No state with 6+ recruits converts materially worse for you than for ${peerLabel}.` + (best && best.ps > (best.peerS ?? 0) + 0.05 ? ` <b>${best.st}</b> converts best: ${pct(best.ps)}% vs ${pct(best.peerS)}%.` : "");
   }
 
   // Map: one dot per player-season, jittered when stacked.
