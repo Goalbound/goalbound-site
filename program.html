@@ -35,10 +35,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
   :root{--ground:#0a0b0c;--panel:#111214;--ink:#f4f4f2;--muted:#8b8f94;--dim:#55595e;--line:#222427;
+    /* chart greys: the Insights set, validated against --ground with the dataviz checker */
+    --m1:#f4f4f4;--m2:#9d9d9d;--m3:#616161;
     --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;--body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",Menlo,monospace}
   *{box-sizing:border-box} html{color-scheme:dark}
-  body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--body);display:grid;grid-template-columns:420px 1fr;height:100vh}
-  aside{border-right:1px solid var(--line);overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--body);display:grid;grid-template-columns:540px 1fr;height:100vh}
+  aside{border-right:1px solid var(--line);overflow-y:auto;padding:18px 22px 28px;display:flex;flex-direction:column;gap:14px}
+  aside section{display:flex;flex-direction:column;gap:14px}
   nav.pages{display:flex;flex-wrap:wrap;gap:5px 13px;font:500 11.5px/1.6 var(--mono);padding-bottom:12px;border-bottom:1px solid var(--line)}
   nav.pages a{color:var(--muted);text-decoration:none;white-space:nowrap}
   nav.pages a:hover{color:var(--ink)}
@@ -46,35 +49,51 @@
   .logo{font:700 20px/1 var(--display);letter-spacing:.04em;text-decoration:none;display:flex;align-items:center;gap:9px;color:var(--ink)}
   .logo i{width:9px;height:9px;border-radius:50%;background:var(--ink)}
   .logo sup{font-size:.46em;vertical-align:super;letter-spacing:0}
-  h1{font:700 26px/1.02 var(--display);margin:0}
+  h1{font:700 28px/1.02 var(--display);margin:0}
   .eyebrow{font:500 11px/1.45 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
   .eyebrow a{color:var(--muted)} .eyebrow a:hover{color:var(--ink)}
   .lede{color:var(--muted);font-size:12.5px;line-height:1.45;margin:6px 0 0} .lede a{color:var(--ink)}
+  .ident{display:grid;grid-template-columns:60px 1fr;gap:14px;align-items:center}
+  .badge{width:60px;height:60px;border-radius:10px;display:grid;place-items:center;font:700 21px/1 var(--display);letter-spacing:.03em;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;margin-top:6px} .chips a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--dim)} .chips a:hover{border-color:var(--ink)}
+  .note{border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12.5px;color:var(--muted)} .note b{color:var(--ink);font-weight:500}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   label.f{display:block;font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  label.chk{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)} label.chk input{width:auto}
   select,input{width:100%;padding:6px 8px;font:13px var(--body);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:5px}
-  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-  .card{border:1px solid var(--line);border-radius:6px;padding:8px 9px} .card .n{font:700 20px/1 var(--display)} .card .k{font:11px var(--mono);color:var(--muted);margin-top:3px;line-height:1.3}
-  h2{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:6px 0 0;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-  h2 span{letter-spacing:0;text-transform:none;font-weight:400}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .card{border:1px solid var(--line);border-radius:6px;padding:9px 10px;min-width:0} .card .n{font:700 20px/1.05 var(--display);overflow-wrap:anywhere} .card .k{font:11px/1.35 var(--mono);color:var(--muted);margin-top:4px}
+  h2{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:8px 0 0;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  h2 span{letter-spacing:0;text-transform:none;font-weight:400;text-align:right}
+  h3{font:500 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:4px 0 -6px}
   table{width:100%;border-collapse:collapse;font-size:12.5px} td,th{padding:3px 0;vertical-align:baseline}
-  th{font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);text-align:right;padding-left:8px} th:first-child{text-align:left;padding-left:0}
+  th{font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);text-align:right;padding-left:8px;white-space:nowrap} th:first-child{text-align:left;padding-left:0}
   td.r{text-align:right;font:500 12px var(--mono);color:var(--muted);white-space:nowrap;padding-left:8px} td.r b{color:var(--ink)}
   td a,.links a{color:var(--ink);text-decoration:none} td a:hover,.links a:hover{text-decoration:underline;text-underline-offset:3px}
   td.st,.st{color:var(--muted);font-size:11.5px;padding-left:6px}
   td.st a{color:var(--muted)} td.st a:hover{color:var(--ink)}
   tr.conf td{font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);padding-top:10px}
+  table.kv td:first-child{color:var(--muted);width:46%;padding-right:10px} table.kv td{padding:4px 0;border-bottom:1px solid #16181a}
+  table.kv td:last-child{font:500 12.5px var(--mono)} table.kv small{color:var(--muted);font:400 11.5px var(--body);margin-left:4px}
+  .tag{font:500 9.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--dim);border-radius:3px;padding:2px 4px;margin-left:6px;vertical-align:1px}
   .barw{width:64px;height:5px;background:var(--line);border-radius:2px;display:inline-block;vertical-align:middle;position:relative} .bar{position:absolute;left:0;top:0;height:5px;background:var(--ink);border-radius:2px}
   .links{display:flex;flex-direction:column;gap:4px;font-size:13px} .links a::after{content:" →";color:var(--muted)}
   .status{font:400 11.5px var(--mono);color:var(--muted);line-height:1.45} .status b{color:var(--ink);font-weight:500}
+  .src{font:400 11px/1.45 var(--mono);color:var(--dim)} .src a{color:var(--muted)}
   .none{color:var(--dim);font-size:12.5px}
+  /* record chart */
+  .chart{position:relative} .chart svg{display:block;width:100%;height:auto;overflow:visible}
+  .chart .grid{stroke:#1d1f22;stroke-width:1} .chart .axis{fill:var(--dim);font:10px var(--mono)} .chart .val{fill:var(--muted);font:500 10px var(--mono)}
+  .chart .b{fill:var(--m2)} .chart .b.last{fill:var(--m1)} .chart .hit{fill:transparent;cursor:default} .chart .hit:hover + .b,.chart g:hover .b{fill:var(--m1)}
+  .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--ground);font:12px/1.35 var(--body);padding:6px 8px;border-radius:4px;white-space:nowrap;transform:translate(-50%,-100%);margin-top:-8px;z-index:5} .tip b{font-weight:600}
   #map{height:100vh;background:#0a0b0c}
   .leaflet-container{background:#0a0b0c}
   .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.72) contrast(1.05) saturate(0)}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--ink);color:var(--ground)}
   .leaflet-popup-content{margin:9px 11px;font:13px/1.4 var(--body)} .leaflet-popup-content a{color:var(--ground);font-weight:500} .pc{color:#55595e}
   [hidden]{display:none!important}
-  @media(max-width:760px){body{grid-template-columns:1fr;height:auto}#map{height:60vh}aside{border-right:0;border-bottom:1px solid var(--line)}.grid4{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:1100px){body{grid-template-columns:460px 1fr}}
+  @media(max-width:760px){body{grid-template-columns:1fr;height:auto}#map{height:60vh}aside{border-right:0;border-bottom:1px solid var(--line);padding:16px}.grid3{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body class="tool">
@@ -109,30 +128,48 @@
   </nav>
 
   <!-- Directory: no ?school= in the URL. -->
-  <section id="dir" hidden style="display:flex;flex-direction:column;gap:14px">
+  <section id="dir" hidden>
     <div><div class="eyebrow">Programs</div><h1>Every college lacrosse program</h1>
-      <p class="lede">One page per program: its roster each season, where it recruits, its All-Americans and its top scorers, 2015–2026.</p></div>
+      <p class="lede">A profile of each program: its record and coaches, its campus and academics, its roster each season and where its players come from.</p></div>
     <div class="row">
       <div><label class="f" for="dSport">Sport</label><select id="dSport"><option value="MLA">Men's</option><option value="WLA">Women's</option></select></div>
       <div><label class="f" for="dDiv">Division</label><select id="dDiv"><option value="">All</option><option value="I">Division I</option><option value="II">Division II</option><option value="III">Division III</option></select></div>
     </div>
-    <div><label class="f" for="dFind">Find</label><input id="dFind" type="search" placeholder="School, mascot or conference" autocomplete="off"></div>
+    <div><label class="f" for="dFind">Find</label><input id="dFind" type="search" placeholder="School, nickname, conference or state" autocomplete="off"></div>
+    <label class="chk"><input type="checkbox" id="dOld"> Include programs that no longer play</label>
     <table id="dList"></table>
   </section>
 
   <!-- One program: ?sport=&school= -->
-  <section id="prog" hidden style="display:flex;flex-direction:column;gap:14px">
-    <div><div class="eyebrow" id="pEyebrow"></div><h1 id="pName">–</h1><p class="lede" id="pSub"></p></div>
+  <section id="prog" hidden>
+    <div class="ident">
+      <div class="badge" id="pBadge" aria-hidden="true"></div>
+      <div><div class="eyebrow" id="pEyebrow"></div><h1 id="pName">–</h1></div>
+    </div>
+    <div><p class="lede" id="pSub" style="margin:0"></p><div class="chips" id="pLinks"></div></div>
+    <div class="note" id="pNote" hidden></div>
     <div class="row">
       <div><label class="f" for="pSport">Sport</label><select id="pSport"></select></div>
-      <div><label class="f" for="pYear">Season on the map</label><select id="pYear"></select></div>
+      <div><label class="f" for="pYear">Roster season</label><select id="pYear"></select></div>
     </div>
-    <div class="grid4">
-      <div class="card"><div class="n" id="cSeasons">–</div><div class="k">seasons</div></div>
-      <div class="card"><div class="n" id="cRoster">–</div><div class="k" id="cRosterK">rostered</div></div>
-      <div class="card"><div class="n" id="cStates">–</div><div class="k">home states</div></div>
-      <div class="card"><div class="n" id="cAA">–</div><div class="k">All-Americans</div></div>
-    </div>
+    <div class="grid3" id="facts"></div>
+
+    <h2>Record by season <span id="recN"></span></h2>
+    <div class="chart" id="recChart"></div>
+    <table id="seasons"></table>
+
+    <h2>Coaches <span id="staffSrc"></span></h2>
+    <table id="staff"></table>
+    <h3 id="histHdr">Head coaches</h3>
+    <table id="history"></table>
+
+    <h2>Campus and location</h2>
+    <table class="kv" id="campus"></table>
+
+    <h2>Academics <span>· undergraduate</span></h2>
+    <table class="kv" id="academics"></table>
+    <div class="src" id="acadSrc"></div>
+
     <h2 id="rosterHdr">Roster</h2>
     <table id="roster"></table>
     <h2>Where it recruits <span>· players, all seasons</span></h2>
@@ -153,20 +190,23 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script type="module">
-// The program template: one page renders any college program from ?sport=&school=, and
-// with no ?school= it is the directory of all of them. Same DuckDB-WASM-over-Parquet
-// pattern as the other data pages; reads rosters, hometowns, stats, all_american,
-// schools, teams, conferences.
+// The program template: one page profiles any college program from ?sport=&school=, and
+// with no ?school= it is the directory of all of them. DuckDB-WASM over the site's
+// Parquet: programs, seasons, coaches and staff for the profile (publish/export.py,
+// "Program profiles"), rosters, hometowns, stats and all_american for the players.
 import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm";
 
 const DATA_BASE = new URL((new URLSearchParams(location.search).get("data") || "/data"), location.origin).href.replace(/\/$/, "");
 const $ = id => document.getElementById(id);
 const status = t => $("status").innerHTML = t;
-const esc = s => String(s).replace(/'/g, "''");
 const html = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const SPORT = { MLA: "Men's lacrosse", WLA: "Women's lacrosse" };
-const ROMAN = { 1: "I", 2: "II", 3: "III" };
 const CLASS_ORDER = ["Graduate Student", "Sixth Year", "Fifth Year", "Redshirt Senior", "Senior", "Redshirt Junior", "Junior", "Redshirt Sophomore", "Sophomore", "Redshirt Freshman", "Redshirt", "Freshman"];
+const num = x => x == null || Number.isNaN(x) ? null : x;
+const pct = (x, d = 0) => num(x) == null ? null : `${(x * 100).toFixed(d)}%`;
+const usd = x => num(x) == null ? null : `$${Math.round(x).toLocaleString()}`;
+const int = x => num(x) == null ? null : Math.round(x).toLocaleString();
+const wl = (w, l, t) => w == null ? "–" : `${w}–${l}${t ? `–${t}` : ""}`;
 let conn, map, layer, meta, programs;
 
 async function boot() {
@@ -175,33 +215,23 @@ async function boot() {
   const db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING), worker);
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
   conn = await db.connect();
-  for (const [v, f] of [["r", "rosters"], ["h", "hometowns"], ["st", "stats"], ["aa", "all_american"], ["sch", "schools"], ["tm", "teams"], ["conf", "conferences"]])
+  for (const [v, f] of [["r", "rosters"], ["h", "hometowns"], ["st", "stats"], ["aa", "all_american"], ["sch", "schools"],
+                        ["prog", "programs"], ["seas", "seasons"], ["coach", "coaches"], ["staff", "staff"]])
     await conn.query(`create view ${v} as select * from read_parquet('${DATA_BASE}/${f}.parquet')`);
   try { meta = await (await fetch(`${DATA_BASE}/_manifest.json`)).json(); } catch { meta = null; }
 
-  // A program is a school that has fielded a rostered team in a sport. Division and
-  // conference are per sport (teams), falling back to the school's own.
-  programs = await q(`
-    with p as (select sport_id, school_id, min(year) y0, max(year) y1, count(distinct year) seasons,
-                      count(*) filter (where year = (select max(year) from r)) latest
-               from r group by 1, 2)
-    select p.*, s.display_name, s.mascot, s.abbreviation, s.athletics_site, s.lat, s.lon,
-           coalesce(t.division, ['I','II','III'][s.division]) div,
-           coalesce(c.name, c2.name) conference
-    from p join sch s on s.id = p.school_id
-    left join tm t on t.sport_id = p.sport_id and t.school_id = p.school_id
-    left join conf c on c.id = t.conference_id and c.id <> 0
-    left join conf c2 on c2.id = s.conference_id and c2.id <> 0
-    order by s.display_name`);
+  programs = await q(`select sport_id, school_id, school display_name, nickname, abbreviation, division div, conference, status,
+                             first_season y0, last_season y1, city, state, campus_lat lat, campus_lon lon, color
+                      from prog order by school`);
 
   map = L.map("map", { scrollWheelZoom: true }).setView([39.5, -86], 5);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
   requestAnimationFrame(() => map.invalidateSize());
 
   ["dSport", "dDiv"].forEach(id => $(id).onchange = () => { setParams({ sport: $("dSport").value }, true); route(); });
-  $("dFind").oninput = () => renderDirectory();
+  $("dFind").oninput = $("dOld").onchange = () => renderDirectory();
   $("pSport").onchange = () => go({ sport: $("pSport").value, school: current().school });
-  $("pYear").onchange = () => { setParams({ ...current(), year: $("pYear").value }, true); renderMap().catch(err); };
+  $("pYear").onchange = () => { setParams({ ...current(), year: $("pYear").value }, true); renderRoster().catch(err); };
   window.onpopstate = () => route();
   document.addEventListener("click", e => {   // in-page navigation between programs, no reload
     const a = e.target.closest("a[data-prog]");
@@ -232,18 +262,36 @@ async function route() {
   else { $("dSport").value = SPORT[c.sport] ? c.sport : "MLA"; renderDirectory(); }
 }
 
+// ---- Monogram: the school's initials on its athletics site's colour --------------------
+function initials(p) {
+  const ab = String(p.abbreviation || "").replace(/[().]/g, "").trim();
+  if (ab && ab.length <= 5 && !/\s/.test(ab)) return ab.toUpperCase();
+  const skip = new Set(["university", "college", "of", "the", "at", "and", "&", "in", "state"]);
+  const w = String(p.display_name).replace(/\(.*?\)|,.*$/g, "").split(/[\s-]+/).filter(x => x && !skip.has(x.toLowerCase()));
+  return (w.length ? w.slice(0, 3).map(x => x[0]).join("") : p.display_name.slice(0, 2)).toUpperCase();
+}
+function badge(el, p) {
+  el.textContent = initials(p);
+  if (p.color) {
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(p.color.slice(i, i + 2), 16) / 255).map(c => c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4);
+    const lum = .2126 * r + .7152 * g + .0722 * b;
+    el.style.background = p.color; el.style.color = lum > .35 ? "#0a0b0c" : "#f4f4f2"; el.style.borderColor = "transparent";
+  } else { el.style.background = ""; el.style.color = ""; el.style.borderColor = ""; }
+}
+
 // ---- Directory -------------------------------------------------------------------------
 function renderDirectory() {
   document.title = "College lacrosse programs: rosters, hometowns and All-Americans · Goalbound";
-  const sport = $("dSport").value, div = $("dDiv").value, find = $("dFind").value.trim().toLowerCase();
-  const list = programs.filter(p => p.sport_id === sport && (!div || p.div === div) &&
-    (!find || [p.display_name, p.mascot, p.conference, p.abbreviation].some(s => (s || "").toLowerCase().includes(find))));
-  const byDiv = {};
-  for (const p of list) { const k = `${p.div || "?"}|${p.conference || "Independent / unknown"}`; (byDiv[k] = byDiv[k] || []).push(p); }
-  const keys = Object.keys(byDiv).sort((a, b) => { const [da, ca] = a.split("|"), [db, cb] = b.split("|"); return da.length - db.length || da.localeCompare(db) || ca.localeCompare(cb); });
+  const sport = $("dSport").value, div = $("dDiv").value, find = $("dFind").value.trim().toLowerCase(), old = $("dOld").checked;
+  const list = programs.filter(p => p.sport_id === sport && (!div || p.div === div) && (old || p.status !== "inactive") &&
+    (!find || [p.display_name, p.nickname, p.conference, p.abbreviation, p.state].some(s => (s || "").toLowerCase().includes(find))));
+  const groups = {};
+  for (const p of list) { const k = `${p.div || "?"}|${p.conference || "Independent / unknown"}`; (groups[k] = groups[k] || []).push(p); }
+  const keys = Object.keys(groups).sort((a, b) => { const [da, ca] = a.split("|"), [db, cb] = b.split("|"); return da.length - db.length || da.localeCompare(db) || ca.localeCompare(cb); });
+  const tag = p => p.status === "upcoming" ? `<span class="tag">no season yet</span>` : p.status === "inactive" ? `<span class="tag">inactive</span>` : "";
   $("dList").innerHTML = keys.length ? keys.map(k => { const [d, c] = k.split("|");
-    return `<tr class="conf"><td colspan="2">Division ${d} · ${html(c)}</td></tr>` + byDiv[k].map(p =>
-      `<tr><td>${progLink(sport, p.school_id, p.display_name)}</td><td class="r">${p.y0}–${String(p.y1).slice(2)}</td></tr>`).join(""); }).join("")
+    return `<tr class="conf"><td colspan="2">Division ${d} · ${html(c)}</td></tr>` + groups[k].map(p =>
+      `<tr><td>${progLink(sport, p.school_id, p.display_name)}${tag(p)}</td><td class="r">${p.y0 ? `${p.y0}–${String(p.y1).slice(2)}` : ""}</td></tr>`).join(""); }).join("")
     : `<tr><td class="none">No program matches.</td></tr>`;
 
   if (layer) map.removeLayer(layer);
@@ -251,7 +299,10 @@ function renderDirectory() {
     .bindPopup(`<a data-prog href="${progHref(sport, p.school_id)}">${html(p.display_name)}</a><br><span class="pc">D${p.div} · ${html(p.conference || "")}</span>`));
   layer = L.layerGroup(ms).addTo(map);
   fit(ms.map(m => m.getLatLng()));
-  status(`<b>${list.length}</b> ${SPORT[sport].toLowerCase()} programs${div ? ` in Division ${div}` : ""}${find ? ` matching “${html(find)}”` : ""} · a program is any school with a scraped roster, 2015–2026${meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : ""}.`);
+  const n = s => list.filter(p => p.status === s).length;
+  status(`<b>${n("active")}</b> ${SPORT[sport].toLowerCase()} programs${div ? ` in Division ${div}` : ""}${find ? ` matching “${html(find)}”` : ""}` +
+    (n("upcoming") ? `, plus ${n("upcoming")} in the NCAA's 2026–27 list that have not played yet` : "") + (n("inactive") ? `, and ${n("inactive")} that no longer play` : "") +
+    ` · membership from the NCAA directory, 2026–27${meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : ""}.`);
 }
 
 // ---- One program -----------------------------------------------------------------------
@@ -259,41 +310,51 @@ let P;   // the program being shown, plus its roster rows
 async function renderProgram(prog) {
   status("Querying…");
   const sport = prog.sport_id, id = prog.school_id, name = prog.display_name;
-  document.title = `${name} ${sport === "MLA" ? "men's" : "women's"} lacrosse: roster and hometowns · Goalbound`;
-  $("pEyebrow").innerHTML = `<a data-prog href="/program.html?sport=${sport}">Programs</a> · Division ${prog.div} · ${html(prog.conference || "no conference on file")}`;
+  const where = `sport_id='${sport}' and school_id=${id}`;
+  const [[p], seasons, coaches, staff] = await Promise.all([
+    q(`select * from prog where ${where}`), q(`select * from seas where ${where} order by year`),
+    q(`select * from coach where ${where} order by last_year desc nulls last, seasons_here desc`), q(`select * from staff where ${where} order by ord`)]);
+  document.title = `${name} ${sport === "MLA" ? "men's" : "women's"} lacrosse: profile, roster and hometowns · Goalbound`;
+
+  // Header.
+  badge($("pBadge"), prog);
+  $("pEyebrow").innerHTML = `<a data-prog href="/program.html?sport=${sport}">Programs</a> · Division ${p.division} · ${html(p.conference || "no conference on file")}`;
   $("pName").textContent = name;
-  $("pSub").innerHTML = [SPORT[sport], prog.mascot && html(prog.mascot), prog.athletics_site && `<a href="${html(prog.athletics_site)}" rel="noopener" target="_blank">${html(prog.athletics_site.replace(/^https?:\/\/(www\.)?/, ""))}</a>`].filter(Boolean).join(" · ");
-  const other = programs.filter(p => p.school_id === id);
-  $("pSport").innerHTML = other.map(p => `<option value="${p.sport_id}">${SPORT[p.sport_id]}</option>`).join("");
+  $("pSub").innerHTML = [SPORT[sport], p.nickname && html(p.nickname), [p.city, p.state].filter(Boolean).map(html).join(", ")].filter(Boolean).join(" · ");
+  const host = u => String(u).replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+  $("pLinks").innerHTML = [
+    p.athletics_site && `<a href="${html(p.athletics_site)}" target="_blank" rel="noopener">${html(host(p.athletics_site))}</a>`,
+    p.academics_site && `<a href="${html(p.academics_site)}" target="_blank" rel="noopener">${html(host(p.academics_site))}</a>`,
+    p.athletics_twitter && `<a href="${html(p.athletics_twitter)}" target="_blank" rel="noopener">X</a>`,
+    p.athletics_instagram && `<a href="${html(p.athletics_instagram)}" target="_blank" rel="noopener">Instagram</a>`,
+  ].filter(Boolean).join("");
+  $("pNote").hidden = p.status === "active";
+  $("pNote").innerHTML = p.status === "upcoming" ? `<b>No season played yet.</b> ${html(name)} is in the NCAA's 2026–27 ${sport === "MLA" ? "men's" : "women's"} lacrosse list; its first roster appears here once it plays.`
+    : p.status === "inactive" ? `<b>No longer plays.</b> ${html(name)} is not in the NCAA's 2026–27 list; its last season on file is ${p.last_season ?? "unknown"}.` : "";
+  const other = programs.filter(x => x.school_id === id);
+  $("pSport").innerHTML = other.map(x => `<option value="${x.sport_id}">${SPORT[x.sport_id]}</option>`).join("");
   $("pSport").value = sport; $("pSport").disabled = other.length < 2;
 
-  // One row per player-season: roster, plus the hometown's geocode and the stats line.
-  // Both joins are pre-aggregated on the player-season key (a few names appear twice).
+  // Roster rows: roster + hometown geocode + stats line, one per player-season.
   const rows = await q(`
     with ro as (select year, player_name, any_value(class_year) class_year, any_value(position) pos,
                        any_value(hometown) hometown, any_value(highschool) highschool
-                from r where sport_id='${sport}' and school_id=${id} group by 1, 2),
+                from r where ${where} group by 1, 2),
          ho as (select year, player_name, any_value(town) town, any_value(town_disp) town_disp, any_value(state) state,
                        any_value(country) country, any_value(lat) lat, any_value(lng) lng
-                from h where sport_id='${sport}' and school_id=${id} group by 1, 2),
+                from h where ${where} group by 1, 2),
          sl as (select year, player_name, sum(games_played)::int gp, sum(games_started)::int gs,
                        sum(goals)::int g, sum(assists)::int a, sum(points)::int pts
-                from st where sport_id='${sport}' and school_id=${id} group by 1, 2)
+                from st where ${where} group by 1, 2)
     select ro.*, ho.town, ho.town_disp, ho.state, ho.country, ho.lat, ho.lng, sl.gp, sl.gs, sl.g, sl.a, sl.pts
     from ro left join ho using (year, player_name) left join sl using (year, player_name)
     order by ro.year desc, ro.player_name`);
-  P = { prog, rows };
+  P = { prog, p, rows };
   const years = [...new Set(rows.map(r => r.year))].sort((a, b) => b - a);
-  $("pYear").innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("") + `<option value="all">All seasons</option>`;
+  $("pYear").innerHTML = years.length ? years.map(y => `<option value="${y}">${y}</option>`).join("") + `<option value="all">All seasons</option>` : `<option value="">No roster yet</option>`;
+  $("pYear").disabled = !years.length;
   const want = current().year;
-  $("pYear").value = years.map(String).concat("all").includes(want) ? want : String(years[0]);
-
-  // Distinct players across seasons (a name at one school is one player).
-  const players = new Map();
-  for (const r of [...rows].reverse()) players.set(r.player_name, { ...(players.get(r.player_name) || {}), ...Object.fromEntries(Object.entries(r).filter(([, v]) => v != null)) });
-  const people = [...players.values()];
-  const count = (arr, key) => { const m = new Map(); for (const x of arr) { const k = key(x); if (k) m.set(k, (m.get(k) || 0) + 1); } return [...m].sort((a, b) => b[1] - a[1]); };
-  const states = count(people, p => p.state && `${p.country}|${p.state}`);
+  $("pYear").value = years.map(String).concat("all").includes(want) ? want : String(years[0] ?? "");
 
   const aa = await q(`
     with rr as (select distinct year, lower(trim(player_name)) pn, school_id from r where sport_id='${sport}')
@@ -303,18 +364,36 @@ async function renderProgram(prog) {
     where aa.sport_id='${sport}' and (s2.id = ${id} or (s2.id is null and rr.school_id = ${id}))
     order by aa.year desc, case aa.team when 'First' then 1 when 'Second' then 2 when 'Third' then 3 else 4 end, aa.player_name`);
 
-  $("cSeasons").textContent = years.length;
-  $("cRoster").textContent = rows.filter(r => r.year === years[0]).length;
-  $("cRosterK").textContent = `rostered in ${years[0]}`;
-  $("cStates").textContent = states.length;
-  $("cAA").textContent = aa.length;
+  // Key facts.
+  const rec = seasons.filter(s => s.wins != null);
+  const last = rec[rec.length - 1];
+  const headHere = coaches.find(c => p.head_coach && c.name.toLowerCase() === p.head_coach.toLowerCase());
+  const card = (n, k) => `<div class="card"><div class="n">${n ?? "–"}</div><div class="k">${k}</div></div>`;
+  $("facts").innerHTML = [
+    card(last ? wl(last.wins, last.losses, last.ties) : null, last ? `${last.year} record${last.conf_wins != null ? ` · ${last.conf_wins}–${last.conf_losses} conf.` : ""}` : "record"),
+    card(p.head_coach ? html(p.head_coach) : null, headHere ? `head coach · ${html(headHere.record_here)} here` : "head coach"),
+    card(p.venue ? html(p.venue) : null, p.venue_capacity ? `home field · ${int(p.venue_capacity)} seats` : "home field"),
+    card(int(p.undergrads), `undergraduates · ${p.control === 1 ? "public" : p.control ? "private" : "–"}`),
+    card(pct(p.admit_rate), "admission rate"),
+    card(aa.length, "All-American selections"),
+  ].join("");
 
-  // Where it recruits: states, then canonical towns (linked to the hometown page).
+  renderRecord(seasons, sport);
+  renderCoaches(p, coaches, staff);
+  renderCampus(p);
+  renderAcademics(p);
+
+  // Distinct players across seasons (a name at one school is one player).
+  const players = new Map();
+  for (const r of [...rows].reverse()) players.set(r.player_name, { ...(players.get(r.player_name) || {}), ...Object.fromEntries(Object.entries(r).filter(([, v]) => v != null)) });
+  const people = [...players.values()];
+  const count = (arr, key) => { const m = new Map(); for (const x of arr) { const k = key(x); if (k) m.set(k, (m.get(k) || 0) + 1); } return [...m].sort((a, b) => b[1] - a[1]); };
+  const states = count(people, x => x.state && `${x.country}|${x.state}`);
   const top = states[0]?.[1] || 1;
   $("states").innerHTML = states.slice(0, 12).map(([k, n]) => { const [country, state] = k.split("|");
     return `<tr><td>${html(state)}${country !== "United States" ? `<span class="st">${html(country)}</span>` : ""}</td><td class="r"><span class="barw"><span class="bar" style="width:${Math.round(n / top * 100)}%"></span></span> <b>${n}</b> <span style="color:var(--dim)">${Math.round(n / people.length * 100)}%</span></td></tr>`; }).join("")
     + (states.length > 12 ? `<tr><td class="st" style="padding-left:0">+ ${states.length - 12} more</td></tr>` : "") || `<tr><td class="none">No hometowns on file.</td></tr>`;
-  const towns = count(people, p => p.town && `${p.country}|${p.state}|${p.town}|${p.town_disp}`);
+  const towns = count(people, x => x.town && `${x.country}|${x.state}|${x.town}|${x.town_disp}`);
   $("towns").innerHTML = towns.slice(0, 10).map(([k, n]) => { const [country, state, town, disp] = k.split("|");
     const href = `/hometown.html?country=${encodeURIComponent(country)}&state=${encodeURIComponent(state)}&town=${encodeURIComponent(town)}&sport=${sport}`;
     return `<tr><td><a href="${href}">${html(disp)}</a><span class="st">${html(state)}</span></td><td class="r"><b>${n}</b></td></tr>`; }).join("") || `<tr><td class="none">No hometowns on file.</td></tr>`;
@@ -324,30 +403,119 @@ async function renderProgram(prog) {
     || `<tr><td class="none">None on file. Selections run 2015–2026 for men, 2015–2025 for women.</td></tr>`;
 
   const career = new Map();
-  for (const r of rows) if (r.pts != null) { const c = career.get(r.player_name) || { pts: 0, g: 0, a: 0, gp: 0, y0: r.year, y1: r.year }; c.pts += r.pts; c.g += r.g || 0; c.a += r.a || 0; c.gp += r.gp || 0; c.y0 = Math.min(c.y0, r.year); c.y1 = Math.max(c.y1, r.year); career.set(r.player_name, c); }
+  for (const r of rows) if (r.pts != null) { const c = career.get(r.player_name) || { pts: 0, g: 0, a: 0, y0: r.year, y1: r.year }; c.pts += r.pts; c.g += r.g || 0; c.a += r.a || 0; c.y0 = Math.min(c.y0, r.year); c.y1 = Math.max(c.y1, r.year); career.set(r.player_name, c); }
   const best = [...career].sort((a, b) => b[1].pts - a[1].pts).slice(0, 10).filter(([, c]) => c.pts > 0);
   $("scorers").innerHTML = best.length ? `<tr><th>Player</th><th>G</th><th>A</th><th>Pts</th></tr>` + best.map(([n, c]) =>
     `<tr><td>${html(n)}<span class="st">${c.y0 === c.y1 ? c.y0 : `${c.y0}–${String(c.y1).slice(2)}`}</span></td><td class="r">${c.g}</td><td class="r">${c.a}</td><td class="r"><b>${c.pts}</b></td></tr>`).join("")
     : `<tr><td class="none">No stats on file for this program.</td></tr>`;
 
   $("links").innerHTML = [
-    `<a href="/yield.html?sport=${sport}&school=${id}">Playing time by home state, vs the conference</a>`,
+    years.length && `<a href="/yield.html?sport=${sport}&school=${id}">Playing time by home state, vs the conference</a>`,
     `<a href="/elite-footprint.html">How its map compares with the top 10</a>`,
     `<a data-prog href="/program.html?sport=${sport}">All ${SPORT[sport].toLowerCase()} programs</a>`,
-  ].join("");
+  ].filter(Boolean).join("");
 
-  await renderMap();
+  await renderRoster();
+}
+
+// Win percentage by season as columns, one series, so no legend; the table below is the
+// chart's table view. Hover a column for the record, conference record and coach.
+function renderRecord(seasons, sport) {
+  const rec = seasons.filter(s => s.wins != null && s.wins + s.losses + (s.ties || 0) > 0);
+  $("recN").textContent = rec.length ? `· win % · ${rec[0].year}${rec.length > 1 ? `–${rec[rec.length - 1].year}` : ""}` : "";
+  if (!rec.length) { $("recChart").innerHTML = `<p class="none">No seasons on file.</p>`; $("seasons").innerHTML = ""; return; }
+  const W = 496, H = 128, top = 14, bottom = 18, left = 26, band = (W - left) / rec.length, bw = Math.min(24, band - 2), r = 4;
+  const y = v => top + (1 - v) * (H - top - bottom);
+  const col = (s, i) => {
+    const v = (s.wins + (s.ties || 0) / 2) / (s.wins + s.losses + (s.ties || 0)), x = left + i * band + (band - bw) / 2, y0 = y(0), y1 = y(v);
+    const hgt = y0 - y1, rr = Math.min(r, hgt);
+    const d = hgt <= 0 ? "" : `M${x},${y0} V${y1 + rr} Q${x},${y1} ${x + rr},${y1} H${x + bw - rr} Q${x + bw},${y1} ${x + bw},${y1 + rr} V${y0} Z`;
+    return `<g data-i="${i}"><rect class="hit" x="${left + i * band}" y="${top}" width="${band}" height="${H - top - bottom}"></rect><path class="b${i === rec.length - 1 ? " last" : ""}" d="${d}"></path>` +
+      `<text class="axis" x="${x + bw / 2}" y="${H - 4}" text-anchor="middle">${String(s.year).slice(2)}</text></g>`;
+  };
+  const lastV = rec[rec.length - 1], lv = (lastV.wins + (lastV.ties || 0) / 2) / (lastV.wins + lastV.losses + (lastV.ties || 0));
+  $("recChart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Win percentage by season">` +
+    [0, .5, 1].map(v => `<line class="grid" x1="${left}" x2="${W}" y1="${y(v)}" y2="${y(v)}"></line><text class="axis" x="0" y="${y(v) + 3}">${v * 100}%</text>`).join("") +
+    rec.map(col).join("") +
+    `<text class="val" x="${left + (rec.length - 1) * band + band / 2}" y="${y(lv) - 4}" text-anchor="middle">${Math.round(lv * 100)}%</text></svg><div class="tip" hidden></div>`;
+  const tip = $("recChart").querySelector(".tip"), box = $("recChart");
+  box.querySelectorAll("g[data-i]").forEach(g => {
+    g.onmouseenter = () => { const s = rec[+g.dataset.i], b = g.querySelector("path").getBBox(), sv = box.querySelector("svg").getBoundingClientRect(), k = sv.width / W;
+      tip.innerHTML = `<b>${s.year}</b> · ${wl(s.wins, s.losses, s.ties)}${s.conf_wins != null ? ` · conf. ${s.conf_wins}–${s.conf_losses}` : ""}${s.head_coach ? `<br>${html(s.head_coach)}` : ""}`;
+      tip.style.left = `${(b.x + b.width / 2) * k}px`; tip.style.top = `${(b.y || y(0)) * k}px`; tip.hidden = false; };
+    g.onmouseleave = () => tip.hidden = true;
+  });
+  const per = (a, g) => a == null || !g ? "–" : (a / g).toFixed(1);
+  const rate = (a, b) => a == null || !b ? "–" : `${Math.round(a / b * 100)}%`;
+  $("seasons").innerHTML = `<tr><th>Season</th><th>W–L</th><th>Conf.</th><th title="Goals per game">GF/G</th><th title="Goals against per game">GA/G</th><th title="Goals per shot">Sh%</th><th title="${sport === "WLA" ? "Draw controls are not in the data; faceoffs where reported" : "Faceoffs won"}">FO%</th></tr>` +
+    [...seasons].reverse().filter(s => s.wins != null || s.goals != null).map(s => { const g = (s.wins ?? 0) + (s.losses ?? 0) + (s.ties ?? 0);
+      return `<tr><td>${s.year}${s.head_coach ? `<span class="st">${html(s.head_coach)}</span>` : ""}</td><td class="r"><b>${wl(s.wins, s.losses, s.ties)}</b></td><td class="r">${s.conf_wins != null ? `${s.conf_wins}–${s.conf_losses}` : "–"}</td>` +
+        `<td class="r">${per(s.goals, g)}</td><td class="r">${per(s.opp_goals, g)}</td><td class="r">${rate(s.goals, s.shots)}</td><td class="r">${rate(s.faceoffs_won, s.faceoffs_taken)}</td></tr>`; }).join("");
+}
+
+function renderCoaches(p, coaches, staff) {
+  $("staffSrc").textContent = staff.length ? `· current staff, from the athletics site` : "";
+  $("staff").innerHTML = staff.length
+    ? staff.map(s => `<tr><td>${s.bio_url ? `<a href="${html(s.bio_url)}" target="_blank" rel="noopener">${html(s.name)}</a>` : html(s.name)}</td><td class="st" style="text-align:right">${html(s.title || "")}</td></tr>`).join("")
+    : `<tr><td class="none">${p.head_coach ? `Head coach: ${html(p.head_coach)} (${html(p.head_coach_source)}). ` : ""}No staff list available from this athletics site.</td></tr>`;
+  $("histHdr").hidden = !coaches.length;
+  const yrs = c => c.first_year && c.last_year && c.last_year - c.first_year + 1 === c.seasons_here
+    ? (c.first_year === c.last_year ? `${c.first_year}` : `${c.first_year}–${String(c.last_year).slice(2)}`) : c.last_year ? `to ${c.last_year}` : "";
+  $("history").innerHTML = coaches.length ? `<tr><th>Coach</th><th>Seasons</th><th>Record here</th></tr>` + coaches.slice(0, 12).map(c =>
+    `<tr><td>${html(c.name)}<span class="st">${yrs(c)}${c.alma_mater ? ` · ${html(c.alma_mater)}${c.alma_mater_year ? ` '${String(c.alma_mater_year).slice(2)}` : ""}` : ""}</span></td><td class="r">${c.seasons_here ?? "–"}</td><td class="r"><b>${html((c.record_here || "–").replace(/-/g, "–"))}</b></td></tr>`).join("")
+    + (coaches.length > 12 ? `<tr><td class="st" style="padding-left:0">+ ${coaches.length - 12} earlier</td></tr>` : "") : "";
+}
+
+const LOCALE = { 11: "City, large", 12: "City, midsize", 13: "City, small", 21: "Suburb, large", 22: "Suburb, midsize", 23: "Suburb, small",
+                 31: "Town, fringe", 32: "Town, distant", 33: "Town, remote", 41: "Rural, fringe", 42: "Rural, distant", 43: "Rural, remote" };
+const kv = rows => rows.filter(([, v]) => v != null && v !== "").map(([k, v, small]) => `<tr><td>${k}</td><td>${v}${small ? `<small>${small}</small>` : ""}</td></tr>`).join("");
+function renderCampus(p) {
+  const addr = [p.street, [p.city, p.state].filter(Boolean).join(", "), p.zip && String(p.zip).slice(0, 5)].filter(Boolean).join(", ");
+  $("campus").innerHTML = kv([
+    ["Address", addr ? html(addr) : null],
+    ["Setting", LOCALE[p.locale] ?? null, p.locale ? "Dept. of Education locale" : ""],
+    ["Home field", p.venue ? html(p.venue) : null, [p.venue_capacity && `${int(p.venue_capacity)} seats`, p.venue_built && `built ${p.venue_built}`].filter(Boolean).join(" · ")],
+    ["Weather, 2024", p.avg_temperature != null ? `${Math.round(p.avg_temperature)}°F average` : null,
+      p.avg_rainfall != null ? `${Math.round(p.avg_rainfall)} in rain · ${Math.round(p.avg_snowfall)} in snow` : ""],
+    ["Map", p.campus_lat != null ? `<a href="#" id="toCampus" style="color:var(--ink)">Show the campus</a>` : null, p.campus_exact ? "" : "city centre — no exact campus on file"],
+  ]) || `<tr><td class="none">No location on file.</td></tr>`;
+  const t = $("toCampus"); if (t) t.onclick = e => { e.preventDefault(); lastFit = null; map.setView([p.campus_lat, p.campus_lon], 15, { animate: false }); };
+}
+
+const TEST = { 1: "Required", 2: "Recommended", 3: "Neither required nor recommended", 5: "Considered but not required" };
+function renderAcademics(p) {
+  const pub = p.control === 1, net = pub ? p.net_price_pub : p.net_price_priv;
+  const range = (a, b) => num(a) == null || num(b) == null ? null : `${Math.round(a)}–${Math.round(b)}`;
+  $("academics").innerHTML = kv([
+    ["Undergraduates", int(p.undergrads), p.undergrads_women != null ? `${pct(p.undergrads_women)} women` : ""],
+    ["Type", p.control === 1 ? "Public" : p.control === 2 ? "Private, nonprofit" : p.control === 3 ? "Private, for-profit" : null,
+      [p.hbcu && "HBCU", p.women_only === 1 && "women only", p.men_only === 1 && "men only"].filter(Boolean).join(" · ")],
+    ["Admission rate", p.open_admission === 1 ? "Open admission" : pct(p.admit_rate)],
+    ["SAT, middle 50%", range(p.sat_rw_25, p.sat_rw_75) ? `${range(p.sat_rw_25, p.sat_rw_75)} · ${range(p.sat_m_25, p.sat_m_75)}` : null, "reading & writing · math"],
+    ["ACT, middle 50%", range(p.act_25, p.act_75)],
+    ["Test scores", TEST[p.test_policy] ?? null],
+    ["Tuition and fees", pub && p.tuition_in !== p.tuition_out ? `${usd(p.tuition_in)} · ${usd(p.tuition_out)}` : usd(p.tuition_out ?? p.tuition_in), pub && p.tuition_in !== p.tuition_out ? "in-state · out-of-state" : ""],
+    ["Cost of attendance", usd(p.cost_of_attendance), "a year, before aid"],
+    ["Average net price", usd(net), "after grants, students with aid"],
+    ["Graduation rate", pct(p.grad_rate), "within six years"],
+    ["First-year retention", pct(p.retention)],
+    ["Student–faculty ratio", num(p.student_faculty) != null ? `${Math.round(p.student_faculty)}:1` : null],
+    ["Pell grant recipients", pct(p.pell_share)],
+    ["Median earnings", usd(p.earnings_10yr), "10 years after starting"],
+    ["Median debt", usd(p.median_debt), "at graduation"],
+  ]) || `<tr><td class="none">No College Scorecard record for this school.</td></tr>`;
+  $("acadSrc").innerHTML = p.unitid ? `Source: U.S. Department of Education, <a href="https://collegescorecard.ed.gov/school/?${html(p.unitid)}" target="_blank" rel="noopener">College Scorecard</a>, June 2026 release${p.sc_name && p.sc_name.toLowerCase() !== String(p.school).toLowerCase() ? ` (reported as ${html(p.sc_name)})` : ""}.` : "";
 }
 
 // The roster table and the map follow the season picker.
-async function renderMap() {
-  const { prog, rows } = P, sport = prog.sport_id, pick = $("pYear").value;
+async function renderRoster() {
+  const { prog, p, rows } = P, sport = prog.sport_id, pick = $("pYear").value;
   const shown = pick === "all" ? rows : rows.filter(r => String(r.year) === pick);
   const ord = c => { const i = CLASS_ORDER.indexOf(c); return i < 0 ? 99 : i; };
   const list = pick === "all"
     ? [...new Map([...shown].reverse().map(r => [r.player_name, r])).values()].sort((a, b) => b.year - a.year || a.player_name.localeCompare(b.player_name))
     : [...shown].sort((a, b) => ord(a.class_year) - ord(b.class_year) || a.player_name.localeCompare(b.player_name));
-  $("rosterHdr").innerHTML = `Roster <span>· ${pick === "all" ? "every player, latest season" : pick} · ${list.length}</span>`;
+  $("rosterHdr").innerHTML = `Roster <span>· ${pick === "all" ? "every player, latest season" : pick || "none yet"} · ${list.length}</span>`;
   const home = r => r.town
     ? `<a href="/hometown.html?country=${encodeURIComponent(r.country)}&state=${encodeURIComponent(r.state)}&town=${encodeURIComponent(r.town)}&sport=${sport}">${html(r.town_disp)}${r.state ? `, ${html(r.state)}` : ""}</a>`
     : html(r.hometown || "");
@@ -367,22 +535,28 @@ async function renderMap() {
       .bindPopup(`<b>${html(r.player_name)}</b> · ${r.year}<br>${html([shortClass(r.class_year), r.pos].filter(Boolean).join(" · "))}<br><span class="pc">${html(r.town_disp || r.hometown || "")}${r.state ? `, ${html(r.state)}` : ""}</span>` +
         (r.highschool ? `<br><span class="pc">${html(r.highschool)}</span>` : "")));
   }
-  if (prog.lat != null) ms.push(L.circleMarker([prog.lat, prog.lon], { radius: 8, fillColor: "#0a0b0c", fillOpacity: 1, color: "#f4f4f2", weight: 2.5 }).bindPopup(`<b>${html(prog.display_name)}</b>`));
+  if (p.campus_lat != null) ms.push(L.circleMarker([p.campus_lat, p.campus_lon], { radius: 8, fillColor: "#0a0b0c", fillOpacity: 1, color: "#f4f4f2", weight: 2.5 }).bindPopup(`<b>${html(prog.display_name)}</b>${p.venue ? `<br><span class="pc">${html(p.venue)}</span>` : ""}`));
   layer = L.layerGroup(ms).addTo(map);
   fit(ms.map(m => m.getLatLng()));
 
   const mapped = list.filter(r => r.lat != null).length;
   status(`<b>${list.length}</b> players shown, <b>${mapped}</b> with a mapped hometown · ring = campus · queried in the browser from Parquet${meta ? ` · data as of ${meta.generated_at.slice(0, 10)}` : ""}. ` +
-    `Rosters come from the school's athletics site; GP and points are the season stats line where one was published (2025 is a partial season for many programs).`);
+    `Records and team stats: the NCAA through 2024 (and women's 2025), the school's athletics site for men's 2025 and all of 2026. Head coaches before 2026 from the NCAA's coach records.`);
 }
 const shortClass = c => ({ "Graduate Student": "Gr", "Fifth Year": "5th", "Sixth Year": "6th", Freshman: "Fr", Sophomore: "So", Junior: "Jr", Senior: "Sr", "Redshirt Freshman": "R-Fr", "Redshirt Sophomore": "R-So", "Redshirt Junior": "R-Jr", "Redshirt Senior": "R-Sr", Redshirt: "RS" })[c] || c || "";
 const shortPos = p => String(p ?? "–").replace(/Long Stick Midfield/g, "LSM").replace(/Face Off/g, "FO").replace(/Midfield/g, "M").replace(/Attack/g, "A").replace(/Defense/g, "D").replace(/Goalie/g, "G").replace(/Draw Control/g, "DC");
 
+// Leaflet measures its container once; under the site header the grid can still be
+// laying out when the first fit runs, which left the map at zoom 0. So the last fit is
+// remembered and redone whenever the container changes size.
+let lastFit = null;
 function fit(pts) {
   pts = pts.filter(p => p.lat > 15 && p.lat < 62 && p.lng > -140 && p.lng < -50);   // North America only; a few hometowns are overseas
-  const go = () => { map.invalidateSize(); if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(.15), { maxZoom: 9, animate: false }); };
-  go(); requestAnimationFrame(() => { if (map.getZoom() <= 3) go(); });
+  lastFit = pts.length ? L.latLngBounds(pts).pad(.15) : null;
+  map.invalidateSize();
+  if (lastFit) map.fitBounds(lastFit, { maxZoom: 9, animate: false });
 }
+new ResizeObserver(() => { if (!map) return; map.invalidateSize(); if (lastFit) map.fitBounds(lastFit, { maxZoom: 9, animate: false }); }).observe(document.getElementById("map"));
 boot().catch(e => status(`<b>Couldn't load the data.</b> ${html(e.message)}`));
 </script>
 </body>
