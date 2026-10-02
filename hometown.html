@@ -241,11 +241,12 @@ async function render() {
   else where = `${milesFrom(homeLL)} <= ${radius}`;
 
   const rows = await q(`
-    select s.display_name school, s.division, s.lat slat, s.lon slon,
-           h.player_name, h.city, h.state, min(h.year) y0, max(h.year) y1, any_value(h.sport_id) sp
+    select s.display_name school, s.lat slat, s.lon slon,
+           h.player_name, h.city, h.state, min(h.year) y0, max(h.year) y1, any_value(h.sport_id) sp,
+           arg_max(h.division, h.year) division   -- lacrosse division in the player's last season
     from h join sch s on s.id = h.school_id
     where ${where}${sportW}
-    group by 1,2,3,4,5,6,7`);
+    group by 1,2,3,4,5,6`);
 
   const players = new Map();
   for (const r of rows) players.set(`${r.player_name}|${r.school}`, r);
@@ -253,8 +254,10 @@ async function render() {
   const bySchool = new Map();
   for (const r of list) {
     const k = r.school;
-    if (!bySchool.has(k)) bySchool.set(k, { school: k, division: r.division, lat: r.slat, lon: r.slon, players: [] });
-    bySchool.get(k).players.push(r);
+    if (!bySchool.has(k)) bySchool.set(k, { school: k, division: r.division, y1: r.y1, lat: r.slat, lon: r.slon, players: [] });
+    const b = bySchool.get(k);
+    if (r.y1 > b.y1) { b.division = r.division; b.y1 = r.y1; }   // a program that changed division shows its latest
+    b.players.push(r);
   }
   const schools = [...bySchool.values()].sort((a, b) => b.players.length - a.players.length || a.school.localeCompare(b.school));
   const towns = new Set(list.map(r => `${r.city}, ${r.state}`));
@@ -268,7 +271,7 @@ async function render() {
       + (radius === 0 && sibs.length ? `<br><span class="pc">Nearby but listed separately: ${sibs.map(p => `${p.disp} (${p.n})`).join(", ")}</span>` : "")
     : `No college players recorded from ${scope} since 2015.`;
 
-  const d1 = schools.filter(s => s.division === 1).reduce((n, s) => n + s.players.length, 0);
+  const d1 = list.filter(r => r.division === 1).length;   // by each player's own last season, so Queens' D2 years don't count as D1
   $("schools").innerHTML = schools.slice(0, 40).map(s =>
     `<tr class="pick" data-school="${s.school.replace(/"/g, "&quot;")}"><td>${s.school}</td>` +
     `<td class="d">D${s.division}</td><td class="n">${s.players.length}</td></tr>`).join("")

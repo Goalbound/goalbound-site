@@ -170,14 +170,14 @@ async function boot() {
            (e.school_id is not null) elite
     from (
       select h.sport_id, h.year, h.school_id, h.player_name, h.town,
-             h.state, h.lat, h.lng, null::varchar tier
+             h.state, h.lat, h.lng, null::varchar tier, h.division
       from ht h where h.year < 2020 and h.state is not null
       union all
-      select u.sport_id, u.year, u.school_id, u.player_name, u.town, u.state, u.lat, u.lng, u.tier
+      select u.sport_id, u.year, u.school_id, u.player_name, u.town, u.state, u.lat, u.lng, u.tier, u.division
       from ur u where u.state is not null) b
-    join sch s on s.id = b.school_id and s.division = 1
     left join el e on e.sport_id = b.sport_id and e.year = b.year and e.school_id = b.school_id
-    where b.year not in (2020, 2021)`);
+    where b.year not in (2020, 2021)
+      and b.division = 1   -- the season's lacrosse division: Hopkins is a D3 school with D1 lacrosse`);
   try { meta = await (await fetch(`${DATA_BASE}/_manifest.json`)).json(); } catch { meta = null; }
   const years = (await q(`select distinct year from d1 order by year`)).map(r => r.year), last = years[years.length - 1];
   $("from").innerHTML = years.map(y => `<option value="${y}">${y}–${last}</option>`).join("");

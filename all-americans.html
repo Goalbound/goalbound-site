@@ -158,7 +158,7 @@ async function boot() {
   // sections are already folded) that has put anyone on a D1 roster, by sport and season.
   await conn.query(`create table d1towns as
      select distinct h.sport_id, h.year season, h.town, h.state
-     from homes h join sch s on s.id = h.school_id where s.division = 1 and h.town is not null`);
+     from homes h where h.division = 1 and h.town is not null`);   // lacrosse division that season, not the school's
   try { meta = await (await fetch(`${DATA_BASE}/_manifest.json`)).json(); } catch { meta = null; }
   const yrs = (await conn.query(`select min(year) lo, max(year) hi from aa`)).toArray()[0];
   const lo = Number(yrs.lo), hi = Number(yrs.hi);

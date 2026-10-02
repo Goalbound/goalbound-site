@@ -179,7 +179,8 @@ const q = async (sql) => (await conn.query(sql)).toArray().map(r => Object.fromE
 
 async function fillSchools(prefer) {
   const sport = $("sport").value;
-  const rows = await q(`select distinct s.id, s.display_name, s.division from ur u join sch s on s.id=u.school_id where u.sport_id='${sport}' and u.team_games>=10 order by s.division, s.display_name`);
+  // Grouped by the program's lacrosse division in its latest season (Hopkins: D1), not the school's.
+  const rows = await q(`select s.id, s.display_name, arg_max(u.division, u.year) division from ur u join sch s on s.id=u.school_id where u.sport_id='${sport}' and u.team_games>=10 group by 1, 2 order by 3, 2`);
   const groups = [1, 2, 3].map(d => { const g = rows.filter(r => r.division === d); return g.length ? `<optgroup label="Division ${"I".repeat(d)}">` + g.map(r => `<option value="${r.id}">${r.display_name}</option>`).join("") + `</optgroup>` : ""; }).join("");
   $("school").innerHTML = groups;
   $("school").value = rows.some(r => r.id === prefer) ? String(prefer) : String(rows[0]?.id ?? "");
@@ -193,7 +194,11 @@ function filters() {
 async function render() {
   const f = filters();
   status("Querying…");
-  const [me] = await q(`select s.display_name, s.division, s.conference_id, c.name conference from sch s left join conf c on c.id=s.conference_id where s.id=${f.school}`);
+  // Lacrosse division and conference from the program's latest season in ur, not the school's.
+  const [me] = await q(`select s.display_name, m.division, m.conference_id, c.name conference
+    from sch s join (select arg_max(division, year) division, arg_max(conference_id, year) conference_id from ur
+                     where school_id=${f.school} and sport_id='${f.sport}') m on true
+    left join conf c on c.id=m.conference_id where s.id=${f.school}`);
   const confW = me.conference_id != null ? `u.conference_id=${me.conference_id} and u.school_id<>${f.school}` : `u.division=${me.division} and u.school_id<>${f.school}`;
   const confName = me.conference ? me.conference.replace(/^The /, "") : null;
   const peerLabel = confName ? `the rest of the ${confName}` : `the rest of Division ${"I".repeat(me.division)}`;

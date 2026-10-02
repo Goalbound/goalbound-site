@@ -10,6 +10,9 @@
   reliability simulation (it is too slow to run in a page), so re-run it after a data
   refresh. This article supersedes the "spread between towns is enormous" line in
   docs/GEOGRAPHY-FINDINGS.md §3.
+  Updated 2026-10-02: per-season lacrosse division (Hopkins, Hobart and the reclassified
+  programs now in D1 for their D1 seasons); numbers re-run with town_null/state_null/
+  town_reliability against that export.
   Corrected 2026-09-25: state tests are two-sided (Florida's bench rate no longer
   clears the bar); Canada's teammate-adjusted +7.2 pts added.
 -->
@@ -32,10 +35,10 @@
 <meta property="og:image:alt" content="Massapequa or Islip? A town's record is mostly luck.">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-09-25">
-<meta property="article:modified_time" content="2026-09-25">
+<meta property="article:modified_time" content="2026-10-02">
 <meta property="article:author" content="Tom Garvey">
 <meta property="article:section" content="Men's lacrosse">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Massapequa or Islip? A town's record is mostly luck","description":"Massapequa's D1 players start; Islip's sit. Shuffle every player's hometown at random and towns like both appear anyway. A town needs about 100 players before its record is half signal.","image":["https://goalbound.co/og/insights-town-records.png"],"datePublished":"2026-09-25","dateModified":"2026-09-25","author":{"@type":"Person","name":"Tom Garvey","url":"https://goalbound.co/about.html"},"publisher":{"@type":"Organization","name":"Goalbound","url":"https://goalbound.co/","logo":{"@type":"ImageObject","url":"https://goalbound.co/logo.png","width":512,"height":512}},"articleSection":"Men's lacrosse","mainEntityOfPage":"https://goalbound.co/insights/town-records.html"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Massapequa or Islip? A town's record is mostly luck","description":"Massapequa's D1 players start; Islip's sit. Shuffle every player's hometown at random and towns like both appear anyway. A town needs about 100 players before its record is half signal.","image":["https://goalbound.co/og/insights-town-records.png"],"datePublished":"2026-09-25","dateModified":"2026-10-02","author":{"@type":"Person","name":"Tom Garvey","url":"https://goalbound.co/about.html"},"publisher":{"@type":"Organization","name":"Goalbound","url":"https://goalbound.co/","logo":{"@type":"ImageObject","url":"https://goalbound.co/logo.png","width":512,"height":512}},"articleSection":"Men's lacrosse","mainEntityOfPage":"https://goalbound.co/insights/town-records.html"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Goalbound","item":"https://goalbound.co/"},{"@type":"ListItem","position":2,"name":"Insights","item":"https://goalbound.co/insights/"},{"@type":"ListItem","position":3,"name":"Massapequa or Islip? A town's record is mostly luck","item":"https://goalbound.co/insights/town-records.html"}]}</script>
 <!-- seo:end -->
 
@@ -82,12 +85,12 @@
       <p class="lede">Two Long Island towns fourteen miles apart look like opposites in Division I. Massapequa's players start; Islip's sit. It is exactly the kind of pattern a recruiter remembers — and most of it is chance.</p>
 
       <h2>Two towns</h2>
-      <p>Since 2022, 25 men from Massapequa, New York have played Division I lacrosse, at 17 programs. They started in 40% of their seasons and spent only 10% on the bench. Across D1, players start in 18% of seasons.</p>
-      <p>Over the same five years, 19 men from Islip played at 16 programs. <b>They started in none of their 39 seasons</b>, and sat on the bench in almost half.</p>
+      <p>Since 2022, 25 men from Massapequa, New York have played Division I lacrosse, at 17 programs. They started in 40% of their seasons and spent only 9% on the bench. Across D1, players start in 18% of seasons.</p>
+      <p>Over the same five years, 21 men from Islip played at 17 programs. <b>They started in none of their 44 seasons</b>, and sat on the bench in almost half.</p>
       <p>Taken at face value, that is a recruiting rule: go to Massapequa, skip Islip.</p>
 
       <h2>Shuffle the players</h2>
-      <p>Here is the test. Take every Division I player from 2022 to 2026 — 7,762 of them, from 1,880 towns — and deal them back out to towns at random, each town keeping its number of players. Now a hometown means nothing at all. Then compare the towns with at least 25 player-seasons, just as before.</p>
+      <p>Here is the test. Take every Division I player from 2022 to 2026 — 8,367 of them, from 1,944 towns — and deal them back out to towns at random, each town keeping its number of players. Now a hometown means nothing at all. Then compare the towns with at least 25 player-seasons, just as before.</p>
 
       <figure id="fig1">
         <h3>Towns by share of seasons their players started — real, and shuffled</h3>
@@ -107,11 +110,11 @@
         <figcaption>Each bar is the number of towns in a five-point band of starting share. Hover a bar for the towns in it. Live query over Goalbound's roster and statistics tables; every shuffle is new.</figcaption>
       </figure>
 
-      <p>We ran the shuffle 2,000 times. <b>In 80% of them, luck alone produced a town whose players started at least 40% of the time</b> — a Massapequa. Luck also produced towns where nobody started: 1.5 per shuffle on average, and three or more in one shuffle in six. The real data has three: Islip, Miller Place and Sparta, New Jersey.</p>
+      <p>We ran the shuffle 2,000 times. <b>In 83% of them, luck alone produced a town whose players started at least 40% of the time</b> — a Massapequa. Luck also produced towns where nobody started: 1.7 per shuffle on average, and four or more in about one shuffle in eleven. The real data has four: Islip, Miller Place, Sparta, New Jersey and Olney, Maryland.</p>
       <p>The real towns do spread out a little further than the shuffled ones, by more than luck explains, so some towns genuinely produce more starters than others. You just can't tell which from five seasons of one town.</p>
 
       <h2>How many players does a town need?</h2>
-      <p>Split each town's record into signal and luck, and a town needs <b>about 100 Division I players before its starting rate is even half signal</b>. No town comes close. The largest had 64 players over the five seasons, and only five had 50 or more.</p>
+      <p>Split each town's record into signal and luck, and a town needs <b>about 100 Division I players before its starting rate is even half signal</b>. No town comes close. The largest, Annapolis, Maryland, had 67 players over the five seasons, and only six had 50 or more.</p>
 
       <figure id="fig2">
         <h3>How much of a town's starting rate is signal, not luck</h3>
@@ -120,7 +123,7 @@
         <figcaption>From 6,000 random draws of players at each size, against the spread between real towns with at least 10 players. Computed 25 September 2026.</figcaption>
       </figure>
 
-      <p>Adjusted for that, the best estimate is that about 23% of Massapequa's players start, and about 15% of Islip's. There is a gap. It is a small fraction of the 40-to-0 on paper.</p>
+      <p>Adjusted for that, the best estimate is that about 22% of Massapequa's players start, and about 15% of Islip's. There is a gap. It is a small fraction of the 40-to-0 on paper.</p>
 
       <h2>What does hold up</h2>
       <p>Bigger groups are a different story, because hundreds of players wash the luck out. Canadian players start more and sit less than a random draw of the same number of D1 players; for starting, luck did not match them once in 4,000 draws. Measured against their own teammates, which rules out Canadians simply landing at weaker programs, they still start 7 points more often. That is the finding behind <a href="/insights/canada.html">our piece on Canada</a>.</p>
@@ -128,15 +131,16 @@
 
       <h2>What to do with it</h2>
       <p><b>Coaches:</b> judge a town by its region, not its record. A town's run of starters, or of players who never see the field, is mostly the particular kids who happened to come through it. The region, with hundreds of players, is where the signal is.</p>
-      <p><b>Families:</b> your town's record is not your ceiling. Islip's zero is what chance does to 19 players.</p>
+      <p><b>Families:</b> your town's record is not your ceiling. Islip's zero is what chance does to 21 players.</p>
 
       <h2>How we counted</h2>
       <ul>
         <li><b>Players:</b> Division I men, 2022–2026, counted once per school. Seasons where the team played fewer than 10 games are left out.</li>
         <li><b>Starter:</b> started at least 60% of the team's games that season. <b>Bench:</b> played in fewer than 25%, or had no stats line.</li>
         <li><b>The shuffle:</b> every player keeps his own seasons and results; only his hometown is reassigned, and every town keeps its number of players. The comparison uses towns with at least 25 player-seasons, the same floor as the town tables.</li>
-        <li><b>Signal share:</b> the spread between real towns (at least 10 players) minus the spread luck produces at the same size. The true difference between towns is about 3.6 percentage points either side of the 18% average.</li>
+        <li><b>Signal share:</b> the spread between real towns (at least 10 players) minus the spread luck produces at the same size. The true difference between towns is about 3.4 percentage points either side of the 18% average.</li>
         <li><b>States and Canada:</b> each group against 4,000 random draws of the same number of players. A result counts only if it would survive testing all 21 groups with at least 150 player-seasons, in either direction. <i>Corrected 25 September 2026: an earlier version tested one direction only and said Florida's bench rate held up.</i></li>
+        <li><b>Division:</b> each roster counts in its lacrosse division that season. <i>Updated 2 October 2026:</i> Johns Hopkins and Hobart, Division III schools that play Division I lacrosse, and Le Moyne, Queens and Mercyhurst from the season each moved up, had been left out of Division I; Hartford is left out from 2024, when it moved down. The counts above now include them, and with routine data updates since 25 September the totals rose from 7,762 players to 8,367. The conclusions are unchanged.</li>
       </ul>
     </article>
 
