@@ -122,13 +122,8 @@ tr.hl .bar { background: var(--m1); }
 @media (prefers-reduced-motion: reduce) { .next a s { transition: none; } }
 @media (max-width: 560px) { .next { grid-template-columns: 1fr; gap: 8px; } }
 
-/* One sponsor slot per page, below the content, always labelled. Until a sponsor is
-   sold it advertises itself. Never inside a figure, never above the article. */
-.sponsor { margin: 34px 0 0; border: 1px dashed var(--line); border-radius: 6px; padding: 16px 18px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-.sponsor .lbl { font: 500 9.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
-.sponsor p { margin-top: 6px; font-size: 14px; line-height: 1.5; color: var(--muted); }
-.sponsor a { font: 500 13px var(--body); color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--dim); white-space: nowrap; }
-.sponsor a:hover { border-bottom-color: var(--ink); }
+/* The banner slot (.gb-ad) styles itself: /ads.js injects its CSS, so the data pages,
+   which do not load this file, get the same banner. Rules are in that file's header. */
 
 .signup { margin: 34px 0 72px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 22px 24px; }
 .signup h3 { font-size: 24px; }
