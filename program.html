@@ -91,6 +91,16 @@
   .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.72) contrast(1.05) saturate(0)}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--ink);color:var(--ground)}
   .leaflet-popup-content{margin:9px 11px;font:13px/1.4 var(--body)} .leaflet-popup-content a{color:var(--ground);font-weight:500} .pc{color:#55595e}
+  /* Program view (2026-10-02, Tom: "make that a larger portion of the page"): on a wide
+     screen the profile takes two-thirds of the width in two columns, the facts sit in one
+     row, and the map stays as a strip on the right. The directory keeps the sidebar. */
+  .pcols,.pcol{display:flex;flex-direction:column;gap:14px;min-width:0}
+  @media(min-width:1100px){
+    body.tool.prof{grid-template-columns:minmax(760px,66%) 1fr}
+    body.prof .pcols{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;align-items:start}
+    body.prof #facts{grid-template-columns:repeat(6,1fr)}
+    body.prof #prog > .row{max-width:520px}
+  }
   [hidden]{display:none!important}
   @media(max-width:1100px){body{grid-template-columns:460px 1fr}}
   @media(max-width:760px){body{grid-template-columns:1fr;height:auto}#map{height:60vh}aside{border-right:0;border-bottom:1px solid var(--line);padding:16px}.grid3{grid-template-columns:repeat(2,1fr)}}
@@ -154,6 +164,7 @@
     </div>
     <div class="grid3" id="facts"></div>
 
+    <div class="pcols"><div class="pcol">
     <h2>Record by season <span id="recN"></span></h2>
     <div class="chart" id="recChart"></div>
     <table id="seasons"></table>
@@ -169,6 +180,7 @@
     <h2>Academics <span>· undergraduate</span></h2>
     <table class="kv" id="academics"></table>
     <div class="src" id="acadSrc"></div>
+    </div><div class="pcol">
 
     <h2 id="rosterHdr">Roster</h2>
     <table id="roster"></table>
@@ -182,6 +194,7 @@
     <table id="scorers"></table>
     <h2>Go deeper</h2>
     <div class="links" id="links"></div>
+    </div></div>
   </section>
 
   <div class="status" id="status">Loading the query engine…</div>
@@ -265,6 +278,7 @@ async function route() {
   const prog = c.school != null && programs.find(p => p.school_id === c.school && p.sport_id === c.sport)
     || c.school != null && programs.find(p => p.school_id === c.school);   // school without that sport: show the one it has
   $("dir").hidden = !!prog; $("prog").hidden = !prog;
+  document.body.classList.toggle("prof", !!prog);   // wide profile layout; the map's ResizeObserver refits it
   if (prog) { if (prog.sport_id !== c.sport) setParams({ sport: prog.sport_id, school: prog.school_id }, true); await renderProgram(prog); }
   else { $("dSport").value = SPORT[c.sport] ? c.sport : "MLA"; renderDirectory(); }
 }
@@ -557,7 +571,7 @@ async function renderRoster() {
     `Records and team stats: the NCAA through 2024 (and women's 2025), the school's athletics site for men's 2025 and all of 2026. Head coaches before 2026 from the NCAA's coach records.`);
 }
 const shortClass = c => ({ "Graduate Student": "Gr", "Fifth Year": "5th", "Sixth Year": "6th", Freshman: "Fr", Sophomore: "So", Junior: "Jr", Senior: "Sr", "Redshirt Freshman": "R-Fr", "Redshirt Sophomore": "R-So", "Redshirt Junior": "R-Jr", "Redshirt Senior": "R-Sr", Redshirt: "RS" })[c] || c || "";
-const shortPos = p => String(p ?? "–").replace(/Long Stick Midfield/g, "LSM").replace(/Face Off/g, "FO").replace(/Midfield/g, "M").replace(/Attack/g, "A").replace(/Defense/g, "D").replace(/Goalie/g, "G").replace(/Draw Control/g, "DC");
+const shortPos = p => String(p ?? "–").replace(/Long Stick Midfield/g, "LSM").replace(/Defensive Midfield/g, "DM").replace(/Face Off/g, "FO").replace(/Midfield/g, "M").replace(/Attack/g, "A").replace(/Defense/g, "D").replace(/Goalie/g, "G").replace(/Draw Control/g, "DC");
 
 // Leaflet measures its container once; under the site header the grid can still be
 // laying out when the first fit runs, which left the map at zoom 0. So the last fit is

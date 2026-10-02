@@ -37,6 +37,14 @@
   .site-header a.n { white-space: nowrap; }
 }
 
+/* Phones: one column that may shrink below its content's natural width. The pages say
+   `grid-template-columns: 1fr`, which never goes narrower than the widest table or
+   select, so on a 375 px phone the layout came out ~410 px and the browser zoomed out
+   to fit, clipping the header's right edge (program pages, 2026-10-02). */
+@media (max-width: 760px) {
+  body.tool { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* The header has the logo, so the sidebar's own logo goes. */
 body.tool > aside > .logo { display: none; }
 
