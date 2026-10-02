@@ -135,7 +135,7 @@
       <div><label class="f" for="dSport">Sport</label><select id="dSport"><option value="MLA">Men's</option><option value="WLA">Women's</option></select></div>
       <div><label class="f" for="dDiv">Division</label><select id="dDiv"><option value="">All</option><option value="I">Division I</option><option value="II">Division II</option><option value="III">Division III</option></select></div>
     </div>
-    <div><label class="f" for="dFind">Find</label><input id="dFind" type="search" placeholder="School, nickname, conference or state" autocomplete="off"></div>
+    <div><label class="f" for="dFind">Find</label><input id="dFind" type="search" placeholder="School, nickname, conference, city or state" autocomplete="off"></div>
     <label class="chk"><input type="checkbox" id="dOld"> Include programs that no longer play</label>
     <table id="dList"></table>
   </section>
@@ -191,10 +191,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script type="module">
 // The program template: one page profiles any college program from ?sport=&school=, and
-// with no ?school= it is the directory of all of them. DuckDB-WASM over the site's
-// Parquet: programs, seasons, coaches and staff for the profile (publish/export.py,
-// "Program profiles"), rosters, hometowns, stats and all_american for the players.
-import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm";
+// with no ?school= it is the directory of all of them. No query engine: the export writes
+// /data/programs/index.json for the directory and /data/programs/<SPORT>/<id>.json with
+// everything one program page shows (publish/export.py, write_program_files). Querying
+// the shared Parquet in the browser took ~15 s on goalbound.co; one file is ~20 KB.
 
 const DATA_BASE = new URL((new URLSearchParams(location.search).get("data") || "/data"), location.origin).href.replace(/\/$/, "");
 const $ = id => document.getElementById(id);
@@ -207,22 +207,24 @@ const pct = (x, d = 0) => num(x) == null ? null : `${(x * 100).toFixed(d)}%`;
 const usd = x => num(x) == null ? null : `$${Math.round(x).toLocaleString()}`;
 const int = x => num(x) == null ? null : Math.round(x).toLocaleString();
 const wl = (w, l, t) => w == null ? "–" : `${w}–${l}${t ? `–${t}` : ""}`;
-let conn, map, layer, meta, programs;
+let map, layer, meta, programs;
+// {cols, rows} -> objects
+const table = t => (t?.rows || []).map(r => Object.fromEntries(t.cols.map((c, i) => [c, r[i]])));
+const getJSON = async url => { const r = await fetch(url); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.json(); };
+const docs = new Map();   // program files already fetched, so back/forward is instant
+const programDoc = (sport, id) => {
+  const k = `${sport}/${id}`;
+  if (!docs.has(k)) docs.set(k, getJSON(`${DATA_BASE}/programs/${k}.json`).catch(e => { docs.delete(k); throw e; }));
+  return docs.get(k);
+};
 
 async function boot() {
-  const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
-  const worker = new Worker(URL.createObjectURL(new Blob([`importScripts("${bundle.mainWorker}");`], { type: "text/javascript" })));
-  const db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING), worker);
-  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-  conn = await db.connect();
-  for (const [v, f] of [["r", "rosters"], ["h", "hometowns"], ["st", "stats"], ["aa", "all_american"], ["sch", "schools"],
-                        ["prog", "programs"], ["seas", "seasons"], ["coach", "coaches"], ["staff", "staff"]])
-    await conn.query(`create view ${v} as select * from read_parquet('${DATA_BASE}/${f}.parquet')`);
-  try { meta = await (await fetch(`${DATA_BASE}/_manifest.json`)).json(); } catch { meta = null; }
-
-  programs = await q(`select sport_id, school_id, school display_name, nickname, abbreviation, division div, conference, status,
-                             first_season y0, last_season y1, city, state, campus_lat lat, campus_lon lon, color
-                      from prog order by school`);
+  // Start fetching the program in the URL alongside the index, not after it.
+  const c0 = current();
+  if (c0.school != null) programDoc(c0.sport, c0.school).catch(() => {});
+  const [index, m] = await Promise.all([getJSON(`${DATA_BASE}/programs/index.json`), getJSON(`${DATA_BASE}/_manifest.json`).catch(() => null)]);
+  meta = m;
+  programs = table(index).map(p => ({ ...p, display_name: p.school, div: p.division, y0: p.first_season, y1: p.last_season, lat: p.campus_lat, lon: p.campus_lon }));
 
   map = L.map("map", { scrollWheelZoom: true }).setView([39.5, -86], 5);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 19 }).addTo(map);
@@ -241,7 +243,6 @@ async function boot() {
   await route();
 }
 const err = e => status(`<b>Query failed.</b> ${html(e.message)}`);
-const q = async (sql) => (await conn.query(sql)).toArray().map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, typeof v === "bigint" ? Number(v) : v])));
 const current = () => { const p = new URLSearchParams(location.search); return { sport: p.get("sport") || "MLA", school: p.get("school") ? Number(p.get("school")) : null, year: p.get("year") }; };
 function setParams(o, replace) {
   const p = new URLSearchParams(location.search);
@@ -302,7 +303,7 @@ function renderDirectory() {
   setHead(HEAD0.title, HEAD0.desc, HEAD0.ogUrl);
   const sport = $("dSport").value, div = $("dDiv").value, find = $("dFind").value.trim().toLowerCase(), old = $("dOld").checked;
   const list = programs.filter(p => p.sport_id === sport && (!div || p.div === div) && (old || p.status !== "inactive") &&
-    (!find || [p.display_name, p.nickname, p.conference, p.abbreviation, p.state].some(s => (s || "").toLowerCase().includes(find))));
+    (!find || [p.display_name, p.nickname, p.conference, p.abbreviation, p.city, p.state].some(s => (s || "").toLowerCase().includes(find))));
   const groups = {};
   for (const p of list) { const k = `${p.div || "?"}|${p.conference || "Independent / unknown"}`; (groups[k] = groups[k] || []).push(p); }
   const keys = Object.keys(groups).sort((a, b) => { const [da, ca] = a.split("|"), [db, cb] = b.split("|"); return da.length - db.length || da.localeCompare(db) || ca.localeCompare(cb); });
@@ -326,12 +327,10 @@ function renderDirectory() {
 // ---- One program -----------------------------------------------------------------------
 let P;   // the program being shown, plus its roster rows
 async function renderProgram(prog) {
-  status("Querying…");
+  status("Loading…");
   const sport = prog.sport_id, id = prog.school_id, name = prog.display_name;
-  const where = `sport_id='${sport}' and school_id=${id}`;
-  const [[p], seasons, coaches, staff] = await Promise.all([
-    q(`select * from prog where ${where}`), q(`select * from seas where ${where} order by year`),
-    q(`select * from coach where ${where} order by last_year desc nulls last, seasons_here desc`), q(`select * from staff where ${where} order by ord`)]);
+  const doc = await programDoc(sport, id);
+  const p = doc.program, seasons = table(doc.seasons), coaches = table(doc.coaches), staff = table(doc.staff);
   const sportWord = sport === "MLA" ? "men's" : "women's";
   const span = p.first_season && p.last_season ? `${p.first_season}\u2013${p.last_season}` : "2015\u20132026";
   setHead(`${name} ${sportWord} lacrosse: profile, roster and hometowns \u00b7 Goalbound`,
@@ -357,20 +356,8 @@ async function renderProgram(prog) {
   $("pSport").innerHTML = other.map(x => `<option value="${x.sport_id}">${SPORT[x.sport_id]}</option>`).join("");
   $("pSport").value = sport; $("pSport").disabled = other.length < 2;
 
-  // Roster rows: roster + hometown geocode + stats line, one per player-season.
-  const rows = await q(`
-    with ro as (select year, player_name, any_value(class_year) class_year, any_value(position) pos,
-                       any_value(hometown) hometown, any_value(highschool) highschool
-                from r where ${where} group by 1, 2),
-         ho as (select year, player_name, any_value(town) town, any_value(town_disp) town_disp, any_value(state) state,
-                       any_value(country) country, any_value(lat) lat, any_value(lng) lng
-                from h where ${where} group by 1, 2),
-         sl as (select year, player_name, sum(games_played)::int gp, sum(games_started)::int gs,
-                       sum(goals)::int g, sum(assists)::int a, sum(points)::int pts
-                from st where ${where} group by 1, 2)
-    select ro.*, ho.town, ho.town_disp, ho.state, ho.country, ho.lat, ho.lng, sl.gp, sl.gs, sl.g, sl.a, sl.pts
-    from ro left join ho using (year, player_name) left join sl using (year, player_name)
-    order by ro.year desc, ro.player_name`);
+  // Roster rows: roster + hometown geocode + stats line, one per player-season, newest first.
+  const rows = table(doc.roster);
   P = { prog, p, rows };
   const years = [...new Set(rows.map(r => r.year))].sort((a, b) => b - a);
   $("pYear").innerHTML = years.length ? years.map(y => `<option value="${y}">${y}</option>`).join("") + `<option value="all">All seasons</option>` : `<option value="">No roster yet</option>`;
@@ -378,13 +365,7 @@ async function renderProgram(prog) {
   const want = current().year;
   $("pYear").value = years.map(String).concat("all").includes(want) ? want : String(years[0] ?? "");
 
-  const aa = await q(`
-    with rr as (select distinct year, lower(trim(player_name)) pn, school_id from r where sport_id='${sport}')
-    select distinct aa.player_name, aa.year, aa.team, aa.division
-    from aa left join sch s2 on lower(s2.display_name) = lower(trim(aa.school))
-    left join rr on rr.year = aa.year and rr.pn = lower(trim(aa.player_name))
-    where aa.sport_id='${sport}' and (s2.id = ${id} or (s2.id is null and rr.school_id = ${id}))
-    order by aa.year desc, case aa.team when 'First' then 1 when 'Second' then 2 when 'Third' then 3 else 4 end, aa.player_name`);
+  const aa = table(doc.all_americans);
 
   // Key facts.
   const rec = seasons.filter(s => s.wins != null);

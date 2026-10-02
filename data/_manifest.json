@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-02T14:54:17.559093+00:00",
+ "generated_at": "2026-10-02T15:27:11.657177+00:00",
  "tables": {
   "schools": {
    "rows": 1092,
@@ -19,7 +19,7 @@
   },
   "hometowns": {
    "rows": 300326,
-   "bytes": 6481695
+   "bytes": 6488303
   },
   "stats": {
    "rows": 274875,
@@ -31,15 +31,15 @@
   },
   "under_recruited": {
    "rows": 190830,
-   "bytes": 4301223
+   "bytes": 4293568
   },
   "elite": {
    "rows": 199,
-   "bytes": 2713
+   "bytes": 2694
   },
   "programs": {
    "rows": 935,
-   "bytes": 211823
+   "bytes": 211799
   },
   "seasons": {
    "rows": 10009,
@@ -52,6 +52,10 @@
   "staff": {
    "rows": 2544,
    "bytes": 47428
+  },
+  "programs/": {
+   "rows": 935,
+   "bytes": 54017637
   }
  }
 }
