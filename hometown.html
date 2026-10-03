@@ -69,6 +69,19 @@
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--ink);color:var(--ground)}
   .leaflet-popup-content{margin:9px 11px;font:13px/1.45 var(--body)} .pc{color:#55595e}
   @media(max-width:760px){body{grid-template-columns:1fr;height:auto}#map{height:58vh}aside{border-right:0;border-bottom:1px solid var(--line)}}
+  /* 2026-10-03, Tom: more room for the results on desktop. The sidebar takes ~46% of a wide
+     screen, "Where they went" and "High schools" sit side by side, players are a table. */
+  .pair{display:flex;flex-direction:column;gap:14px} .pair>div{min-width:0}
+  .tscroll{overflow-x:auto}
+  table.ptab th{font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-align:left;padding:0 10px 6px 0;white-space:nowrap}
+  table.ptab td{padding:5px 10px 5px 0;font-size:12.5px;color:var(--muted)} table.ptab td:first-child{color:var(--ink);font-weight:500}
+  table.ptab td.hsn{color:#c9b681} table.ptab .note{color:var(--dim);font-size:11.5px}
+  .hsfilter{font:500 11.5px var(--mono);color:#c9b681} .hsfilter a{color:var(--muted);margin-left:8px;cursor:pointer;text-decoration:underline}
+  tr.on td{color:var(--home)}
+  @media(min-width:1100px){
+    body.tool{grid-template-columns:minmax(600px,46%) 1fr}
+    .pair{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;align-items:start}
+  }
 </style>
 </head>
 <body class="tool">
@@ -121,11 +134,14 @@
 
   <div class="headline"><div class="n" id="nPlayers">–</div><div class="k" id="headk">loading…</div></div>
 
-  <h2>Where they went</h2>
-  <table id="schools"></table>
+  <div class="pair">
+    <div><h2>Where they went</h2><table id="schools"></table></div>
+    <div><h2 id="hsHdr">High schools</h2><table id="hs"></table></div>
+  </div>
 
   <h2 id="playersHdr">Players</h2>
-  <div class="players" id="players"></div>
+  <div class="hsfilter" id="hsFilter" hidden></div>
+  <div class="tscroll"><table class="ptab" id="players"></table></div>
 
   <div class="status" id="status">Loading the query engine…</div>
   <div class="gb-ad gb-narrow" data-slot="hometown" role="complementary" aria-label="From Goalbound">
@@ -166,6 +182,8 @@ async function boot() {
   conn = await db.connect();
   await conn.query(`create view h as select * from read_parquet('${DATA}/hometowns.parquet') where lat is not null`);
   await conn.query(`create view sch as select * from read_parquet('${DATA}/schools.parquet')`);
+  // hometowns.parquet carries each player-season's high school (hs_base / hs_note) and a
+  // key that folds its spellings together (hs_key); see hs_key() in publish/export.py.
   try { meta = await (await fetch(`${DATA}/_manifest.json`)).json(); } catch { meta = null; }
 
   const countries = await q(`select country, count(distinct player_name) n from h where country is not null group by 1 order by 2 desc, 1`);
@@ -243,7 +261,8 @@ async function render() {
   const rows = await q(`
     select s.display_name school, s.lat slat, s.lon slon,
            h.player_name, h.city, h.state, min(h.year) y0, max(h.year) y1, any_value(h.sport_id) sp,
-           arg_max(h.division, h.year) division   -- lacrosse division in the player's last season
+           arg_max(h.division, h.year) division,   -- lacrosse division in the player's last season
+           mode(h.hs_key) hs_key, mode(h.hs_base) hs_base, mode(h.hs_note) hs_note
     from h join sch s on s.id = h.school_id
     where ${where}${sportW}
     group by 1,2,3,4,5,6`);
@@ -277,10 +296,43 @@ async function render() {
     `<td class="d">D${s.division}</td><td class="n">${s.players.length}</td></tr>`).join("")
     || `<tr><td class="d">nothing to show</td></tr>`;
 
-  $("playersHdr").textContent = `Players (${list.length})`;
-  $("players").innerHTML = list.sort((a, b) => b.y1 - a.y1 || a.player_name.localeCompare(b.player_name)).slice(0, 60)
-    .map(r => `<div><b>${r.player_name}</b> · ${r.city} → ${r.school} <span class="pc">(D${r.division}, ${r.y0 === r.y1 ? r.y1 : r.y0 + "–" + r.y1})</span></div>`).join("")
-    || "—";
+  // High schools: one row per normalised school, shown under its most common printed name.
+  const byHs = new Map();
+  for (const r of list) {
+    const k = r.hs_key || "";
+    if (!byHs.has(k)) byHs.set(k, { key: k, names: new Map(), players: 0, d1: 0 });
+    const g = byHs.get(k); g.players++; if (r.division === 1) g.d1++;
+    if (r.hs_base) g.names.set(r.hs_base, (g.names.get(r.hs_base) || 0) + 1);
+  }
+  for (const g of byHs.values()) g.name = g.key ? [...g.names].sort((a, b) => b[1] - a[1] || a[0].length - b[0].length)[0]?.[0] : "Not listed";
+  const hsList = [...byHs.values()].sort((a, b) => (a.key === "") - (b.key === "") || b.players - a.players || a.name.localeCompare(b.name));
+  const listed = list.filter(r => r.hs_key).length;
+  $("hsHdr").innerHTML = `High schools <span style="text-transform:none;letter-spacing:0;color:var(--dim)">· ${listed} of ${list.length} listed</span>`;
+  $("hs").innerHTML = hsList.slice(0, 40).map(g =>
+    `<tr class="pick" data-hs="${g.key}"><td>${g.name}</td><td class="d" title="went to a D1 program">${g.d1 ? g.d1 + " D1" : ""}</td><td class="n">${g.players}</td></tr>`).join("")
+    || `<tr><td class="d">nothing to show</td></tr>`;
+
+  const PMAX = 200;
+  const drawPlayers = hsKey => {
+    const sel = hsKey == null ? list : list.filter(r => (r.hs_key || "") === hsKey);
+    const g = hsKey == null ? null : byHs.get(hsKey);
+    $("hsFilter").hidden = !g;
+    if (g) $("hsFilter").innerHTML = `Showing ${g.name} only<a id="hsClear">show all</a>`;
+    document.querySelectorAll("#hs tr.pick").forEach(tr => tr.classList.toggle("on", hsKey != null && tr.dataset.hs === hsKey));
+    $("playersHdr").textContent = `Players (${sel.length})`;
+    const rowsHtml = sel.slice().sort((a, b) => b.y1 - a.y1 || a.player_name.localeCompare(b.player_name)).slice(0, PMAX).map(r =>
+      `<tr><td>${r.player_name}</td><td class="hsn">${r.hs_base || "–"}${r.hs_note ? ` <span class="note">(${r.hs_note})</span>` : ""}</td>` +
+      (radius !== 0 ? `<td>${r.city}</td>` : "") +
+      `<td>${r.school}</td><td class="d">D${r.division}</td><td class="d">${r.y0 === r.y1 ? r.y1 : r.y0 + "–" + r.y1}</td></tr>`).join("");
+    $("players").innerHTML = sel.length
+      ? `<tr><th>Player</th><th>High school</th>${radius !== 0 ? "<th>Town</th>" : ""}<th>College</th><th>Div</th><th>Seasons</th></tr>` + rowsHtml +
+        (sel.length > PMAX ? `<tr><td colspan="6" class="d">…and ${sel.length - PMAX} more; narrow the search to see them</td></tr>` : "")
+      : `<tr><td class="d">—</td></tr>`;
+    const c = $("hsClear"); if (c) c.onclick = () => drawPlayers(null);
+  };
+  drawPlayers(null);
+  document.querySelectorAll("#hs tr.pick").forEach(tr => tr.onclick = () =>
+    drawPlayers(tr.classList.contains("on") ? null : tr.dataset.hs));
 
   if (layer) map.removeLayer(layer);
   const marks = [];
