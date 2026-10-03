@@ -78,6 +78,7 @@
   table.ptab td.hsn{color:#c9b681} table.ptab .note{color:var(--dim);font-size:11.5px}
   .hsfilter{font:500 11.5px var(--mono);color:#c9b681} .hsfilter a{color:var(--muted);margin-left:8px;cursor:pointer;text-decoration:underline}
   tr.on td{color:var(--home)}
+  a.hslink{color:var(--dim);text-decoration:none;margin-left:4px} a.hslink:hover{color:var(--home)}
   @media(min-width:1100px){
     body.tool{grid-template-columns:minmax(600px,46%) 1fr}
     .pair{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;align-items:start}
@@ -105,6 +106,7 @@
   <a class="logo" href="/"><i></i><span>GOALBOUND<sup>&reg;</sup></span></a>
   <nav class="pages">
     <a href="/hometown.html" aria-current="page">Your town</a>
+    <a href="/highschool.html">High schools</a>
     <a href="/program.html">Programs</a>
     <a href="/town-yield.html">Town yield</a>
     <a href="/yield.html">My program</a>
@@ -309,7 +311,7 @@ async function render() {
   const listed = list.filter(r => r.hs_key).length;
   $("hsHdr").innerHTML = `High schools <span style="text-transform:none;letter-spacing:0;color:var(--dim)">· ${listed} of ${list.length} listed</span>`;
   $("hs").innerHTML = hsList.slice(0, 40).map(g =>
-    `<tr class="pick" data-hs="${g.key}"><td>${g.name}</td><td class="d" title="went to a D1 program">${g.d1 ? g.d1 + " D1" : ""}</td><td class="n">${g.players}</td></tr>`).join("")
+    `<tr class="pick" data-hs="${g.key}"><td>${g.name}${g.key ? ` <a class="hslink" title="Every player from ${g.name}" href="/highschool.html?${new URLSearchParams({ country, state: $("state").value, hs: g.key, ...(sport ? { sport } : {}) })}">→</a>` : ""}</td><td class="d" title="went to a D1 program">${g.d1 ? g.d1 + " D1" : ""}</td><td class="n">${g.players}</td></tr>`).join("")
     || `<tr><td class="d">nothing to show</td></tr>`;
 
   const PMAX = 200;
@@ -331,8 +333,10 @@ async function render() {
     const c = $("hsClear"); if (c) c.onclick = () => drawPlayers(null);
   };
   drawPlayers(null);
-  document.querySelectorAll("#hs tr.pick").forEach(tr => tr.onclick = () =>
-    drawPlayers(tr.classList.contains("on") ? null : tr.dataset.hs));
+  document.querySelectorAll("#hs tr.pick").forEach(tr => tr.onclick = e => {
+    if (e.target.closest("a.hslink")) return;   // the arrow opens the school's own page
+    drawPlayers(tr.classList.contains("on") ? null : tr.dataset.hs);
+  });
 
   if (layer) map.removeLayer(layer);
   const marks = [];
